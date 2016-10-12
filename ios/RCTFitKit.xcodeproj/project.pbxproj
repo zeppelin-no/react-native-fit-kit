@@ -109,7 +109,7 @@
 				D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */,
 			);
 			name = RCTFitKit;
-			path = RCTAppleHealthKit;
+			path = RCTFitKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -128,7 +128,7 @@
 			dependencies = (
 			);
 			name = RCTFitKit;
-			productName = RCTAppleHealthKit;
+			productName = RCTFitKit;
 			productReference = 3774C88D1D2092F20000B3F3 /* libRCTFitKit.a */;
 			productType = "com.apple.product-type.library.static";
 		};
@@ -280,6 +280,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"/Users/mcmhav/r/MotiOneClient/node_modules/react-native/React/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -293,6 +294,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
+					"/Users/mcmhav/r/MotiOneClient/node_modules/react-native/React/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

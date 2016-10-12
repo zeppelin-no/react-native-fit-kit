@@ -42,4 +42,66 @@
                                    }];
 }
 
+-(void)workout_retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    
+    
+    HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
+    if(distanceUnit == nil){
+        distanceUnit = [HKUnit meterUnit];
+    }
+
+    
+    NSDate *start = [NSDate distantPast];
+    NSDate *end = [NSDate distantFuture];
+    // 1. Predicate to read only running workouts
+    
+    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:start endDate:end options:false];
+    
+    // 2. Order the workouts by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+    
+    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKWorkoutType workoutType]
+                                                                 predicate:predicate
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if (!error && results) {
+                                          NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+                                          
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                              
+                                              for (HKQuantitySample *sample in results) {
+                                                  HKWorkout *workout = (HKWorkout *)sample;
+                                                  
+                                                  double distance = [workout.totalDistance doubleValueForUnit:distanceUnit];
+                                                  
+                                                  // double value = [quantity doubleValueForUnit:unit];
+                                                  
+                                                  NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
+                                                  NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
+                                                  
+                                                  NSDictionary *elem = @{
+                                                                         @"distance" : @(distance),
+                                                                         @"startDate" : startDateString,
+                                                                         @"endDate" : endDateString,
+                                                                         };
+                                                  
+                                                  [data addObject:elem];
+                                              }
+                                              
+                                              callback(@[[NSNull null], data]);
+                                          });
+                                      } else {
+                                          NSLog(@"Error retrieving workouts %@",error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [self.healthStore executeQuery:sampleQuery];
+}
+    
 @end

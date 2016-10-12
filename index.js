@@ -1,12 +1,12 @@
 'use strict'
 
-let { AppleHealthKit } = require('react-native').NativeModules;
+let { FitKit } = require('react-native').NativeModules;
 
 import Constants from './constants';
 
-let FitKit = Object.assign({}, AppleHealthKit, {
+let HealthKit = Object.assign({}, FitKit, {
   Constants: Constants
 });
 
-export default FitKit
-module.exports = FitKit;
+export default HealthKit
+module.exports = HealthKit;

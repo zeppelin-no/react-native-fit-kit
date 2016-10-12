@@ -9,6 +9,7 @@
 //#import "RCTFitKit+Utils.h"
 
 #import "RCTFitKit+Methods_Body.h"
+#import "RCTFitKit+Methods_Workout.h"
 #import "RCTFitKit+Methods_Fitness.h"
 #import "RCTFitKit+Methods_Characteristic.h"
 #import "RCTFitKit+Methods_Vitals.h"
@@ -167,6 +168,11 @@ RCT_EXPORT_METHOD(getRespiratoryRateSamples:(NSDictionary *)input callback:(RCTR
 RCT_EXPORT_METHOD(getBloodGlucoseSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self results_getBloodGlucoseSamples:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self workout_retrieveWorkouts:input callback:callback];
 }
 
 

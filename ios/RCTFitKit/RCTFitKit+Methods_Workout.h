@@ -8,5 +8,6 @@
 @interface RCTFitKit (Methods_Body)
 
 - (void)workout_getLatestWorkout:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)workout_retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 
 @end
