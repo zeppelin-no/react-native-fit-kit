@@ -1,0 +1,327 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D565F0601DAE1FC200AF118B /* RCTFitKit.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F04D1DAE1FC200AF118B /* RCTFitKit.m */; };
+		D565F0611DAE1FC200AF118B /* RCTFitKit+Methods_Body.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F04F1DAE1FC200AF118B /* RCTFitKit+Methods_Body.m */; };
+		D565F0621DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0511DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m */; };
+		D565F0631DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0531DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m */; };
+		D565F0641DAE1FC200AF118B /* RCTFitKit+Methods_Results.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0551DAE1FC200AF118B /* RCTFitKit+Methods_Results.m */; };
+		D565F0651DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0571DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.m */; };
+		D565F0661DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0591DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m */; };
+		D565F0671DAE1FC200AF118B /* RCTFitKit+Queries.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05B1DAE1FC200AF118B /* RCTFitKit+Queries.m */; };
+		D565F0681DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */; };
+		D565F0691DAE1FC200AF118B /* RCTFitKit+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */; };
+		D565F06A1DAE20F700AF118B /* RCTFitKit.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D565F04C1DAE1FC200AF118B /* RCTFitKit.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3774C88B1D2092F20000B3F3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				D565F06A1DAE20F700AF118B /* RCTFitKit.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3774C88D1D2092F20000B3F3 /* libRCTFitKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTFitKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D565F04C1DAE1FC200AF118B /* RCTFitKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTFitKit.h; path = RCTFitKit/RCTFitKit.h; sourceTree = SOURCE_ROOT; };
+		D565F04D1DAE1FC200AF118B /* RCTFitKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTFitKit.m; path = RCTFitKit/RCTFitKit.m; sourceTree = SOURCE_ROOT; };
+		D565F04E1DAE1FC200AF118B /* RCTFitKit+Methods_Body.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Body.h"; path = "RCTFitKit/RCTFitKit+Methods_Body.h"; sourceTree = SOURCE_ROOT; };
+		D565F04F1DAE1FC200AF118B /* RCTFitKit+Methods_Body.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Body.m"; path = "RCTFitKit/RCTFitKit+Methods_Body.m"; sourceTree = SOURCE_ROOT; };
+		D565F0501DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Characteristic.h"; path = "RCTFitKit/RCTFitKit+Methods_Characteristic.h"; sourceTree = SOURCE_ROOT; };
+		D565F0511DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Characteristic.m"; path = "RCTFitKit/RCTFitKit+Methods_Characteristic.m"; sourceTree = SOURCE_ROOT; };
+		D565F0521DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Fitness.h"; path = "RCTFitKit/RCTFitKit+Methods_Fitness.h"; sourceTree = SOURCE_ROOT; };
+		D565F0531DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Fitness.m"; path = "RCTFitKit/RCTFitKit+Methods_Fitness.m"; sourceTree = SOURCE_ROOT; };
+		D565F0541DAE1FC200AF118B /* RCTFitKit+Methods_Results.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Results.h"; path = "RCTFitKit/RCTFitKit+Methods_Results.h"; sourceTree = SOURCE_ROOT; };
+		D565F0551DAE1FC200AF118B /* RCTFitKit+Methods_Results.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Results.m"; path = "RCTFitKit/RCTFitKit+Methods_Results.m"; sourceTree = SOURCE_ROOT; };
+		D565F0561DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Vitals.h"; path = "RCTFitKit/RCTFitKit+Methods_Vitals.h"; sourceTree = SOURCE_ROOT; };
+		D565F0571DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Vitals.m"; path = "RCTFitKit/RCTFitKit+Methods_Vitals.m"; sourceTree = SOURCE_ROOT; };
+		D565F0581DAE1FC200AF118B /* RCTFitKit+Methods_Workout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Workout.h"; path = "RCTFitKit/RCTFitKit+Methods_Workout.h"; sourceTree = SOURCE_ROOT; };
+		D565F0591DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Methods_Workout.m"; path = "RCTFitKit/RCTFitKit+Methods_Workout.m"; sourceTree = SOURCE_ROOT; };
+		D565F05A1DAE1FC200AF118B /* RCTFitKit+Queries.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Queries.h"; path = "RCTFitKit/RCTFitKit+Queries.h"; sourceTree = SOURCE_ROOT; };
+		D565F05B1DAE1FC200AF118B /* RCTFitKit+Queries.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Queries.m"; path = "RCTFitKit/RCTFitKit+Queries.m"; sourceTree = SOURCE_ROOT; };
+		D565F05C1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+TypesAndPermissions.h"; path = "RCTFitKit/RCTFitKit+TypesAndPermissions.h"; sourceTree = SOURCE_ROOT; };
+		D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+TypesAndPermissions.m"; path = "RCTFitKit/RCTFitKit+TypesAndPermissions.m"; sourceTree = SOURCE_ROOT; };
+		D565F05E1DAE1FC200AF118B /* RCTFitKit+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Utils.h"; path = "RCTFitKit/RCTFitKit+Utils.h"; sourceTree = SOURCE_ROOT; };
+		D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Utils.m"; path = "RCTFitKit/RCTFitKit+Utils.m"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3774C88A1D2092F20000B3F3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3774C8841D2092F20000B3F3 = {
+			isa = PBXGroup;
+			children = (
+				3774C88F1D2092F20000B3F3 /* RCTFitKit */,
+				3774C88E1D2092F20000B3F3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3774C88E1D2092F20000B3F3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3774C88D1D2092F20000B3F3 /* libRCTFitKit.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3774C88F1D2092F20000B3F3 /* RCTFitKit */ = {
+			isa = PBXGroup;
+			children = (
+				D565F04C1DAE1FC200AF118B /* RCTFitKit.h */,
+				D565F04D1DAE1FC200AF118B /* RCTFitKit.m */,
+				D565F04E1DAE1FC200AF118B /* RCTFitKit+Methods_Body.h */,
+				D565F04F1DAE1FC200AF118B /* RCTFitKit+Methods_Body.m */,
+				D565F0501DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.h */,
+				D565F0511DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m */,
+				D565F0521DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.h */,
+				D565F0531DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m */,
+				D565F0541DAE1FC200AF118B /* RCTFitKit+Methods_Results.h */,
+				D565F0551DAE1FC200AF118B /* RCTFitKit+Methods_Results.m */,
+				D565F0561DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.h */,
+				D565F0571DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.m */,
+				D565F0581DAE1FC200AF118B /* RCTFitKit+Methods_Workout.h */,
+				D565F0591DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m */,
+				D565F05A1DAE1FC200AF118B /* RCTFitKit+Queries.h */,
+				D565F05B1DAE1FC200AF118B /* RCTFitKit+Queries.m */,
+				D565F05C1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.h */,
+				D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */,
+				D565F05E1DAE1FC200AF118B /* RCTFitKit+Utils.h */,
+				D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */,
+			);
+			name = RCTFitKit;
+			path = RCTAppleHealthKit;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3774C88C1D2092F20000B3F3 /* RCTFitKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3774C8961D2092F20000B3F3 /* Build configuration list for PBXNativeTarget "RCTFitKit" */;
+			buildPhases = (
+				3774C8891D2092F20000B3F3 /* Sources */,
+				3774C88A1D2092F20000B3F3 /* Frameworks */,
+				3774C88B1D2092F20000B3F3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RCTFitKit;
+			productName = RCTAppleHealthKit;
+			productReference = 3774C88D1D2092F20000B3F3 /* libRCTFitKit.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3774C8851D2092F20000B3F3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = "Greg Wilson";
+				TargetAttributes = {
+					3774C88C1D2092F20000B3F3 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 3774C8881D2092F20000B3F3 /* Build configuration list for PBXProject "RCTFitKit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 3774C8841D2092F20000B3F3;
+			productRefGroup = 3774C88E1D2092F20000B3F3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3774C88C1D2092F20000B3F3 /* RCTFitKit */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3774C8891D2092F20000B3F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D565F0691DAE1FC200AF118B /* RCTFitKit+Utils.m in Sources */,
+				D565F0641DAE1FC200AF118B /* RCTFitKit+Methods_Results.m in Sources */,
+				D565F0681DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m in Sources */,
+				D565F0601DAE1FC200AF118B /* RCTFitKit.m in Sources */,
+				D565F0671DAE1FC200AF118B /* RCTFitKit+Queries.m in Sources */,
+				D565F0631DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m in Sources */,
+				D565F0651DAE1FC200AF118B /* RCTFitKit+Methods_Vitals.m in Sources */,
+				D565F0661DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m in Sources */,
+				D565F0621DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m in Sources */,
+				D565F0611DAE1FC200AF118B /* RCTFitKit+Methods_Body.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3774C8941D2092F20000B3F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../MotiOneClient/node_modules/react-native/React/**",
+					"$(SRCROOT)/../../React/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		3774C8951D2092F20000B3F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../MotiOneClient/node_modules/react-native/React/**",
+					"$(SRCROOT)/../../React/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3774C8971D2092F20000B3F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		3774C8981D2092F20000B3F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../node_modules/react-native/React/**",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3774C8881D2092F20000B3F3 /* Build configuration list for PBXProject "RCTFitKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3774C8941D2092F20000B3F3 /* Debug */,
+				3774C8951D2092F20000B3F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3774C8961D2092F20000B3F3 /* Build configuration list for PBXNativeTarget "RCTFitKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3774C8971D2092F20000B3F3 /* Debug */,
+				3774C8981D2092F20000B3F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3774C8851D2092F20000B3F3 /* Project object */;
+}

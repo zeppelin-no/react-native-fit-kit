@@ -1,0 +1,33 @@
+
+{
+  "name": "react-native-fit-kit",
+  "version": "0.0.1",
+  "description": "react-native apple healthkit and google fit bridge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeppelin-no/react-native-fit-kit"
+  },
+  "keywords": [
+    "Apple",
+    "health-kit",
+    "healthkit",
+    "Google-fit",
+    "ReactNative",
+    "react-native",
+    "react",
+    "native",
+    "ios"
+  ],
+  "author": "Zeppelin",
+  "license": "MIT",
+  "devDependencies": {
+    "react-native": ">=0.32.0"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.32.0"
+  }
+}
