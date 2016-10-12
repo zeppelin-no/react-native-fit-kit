@@ -45,12 +45,16 @@
 -(void)workout_retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     
-    
     HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
     if(distanceUnit == nil){
         distanceUnit = [HKUnit meterUnit];
     }
-
+    
+    HKUnit *enegryUnit = [RCTFitKit hkUnitFromOptions:input];
+    if(enegryUnit == nil){
+        enegryUnit = [HKUnit calorieUnit];
+    }
+    
     
     NSDate *start = [NSDate distantPast];
     NSDate *end = [NSDate distantFuture];
@@ -78,14 +82,16 @@
                                                   HKWorkout *workout = (HKWorkout *)sample;
                                                   
                                                   double distance = [workout.totalDistance doubleValueForUnit:distanceUnit];
-                                                  
-                                                  // double value = [quantity doubleValueForUnit:unit];
-                                                  
+                                                  double energy = [workout.totalEnergyBurned doubleValueForUnit:enegryUnit];
+                                                                                                    
                                                   NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
                                                   NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
                                                   
                                                   NSDictionary *elem = @{
                                                                          @"distance" : @(distance),
+                                                                         @"energy" : @(energy),
+                                                                         @"duration" : @(workout.duration),
+                                                                         @"type" : @(workout.workoutActivityType),
                                                                          @"startDate" : startDateString,
                                                                          @"endDate" : endDateString,
                                                                          };
