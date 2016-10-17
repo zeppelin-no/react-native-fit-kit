@@ -6,45 +6,54 @@
 #import "RCTFitKit+Methods_Workout.h"
 #import "RCTFitKit+Queries.h"
 #import "RCTFitKit+Utils.h"
+#import "OMHSerializer.h"
 
 @implementation RCTFitKit (Methods_Workout)
 
-
-- (void)workout_getLatestWorkout:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+-(NSMutableDictionary *)convertHKActivityType:(NSMutableDictionary *)jsonResponse
 {
-    // Query to get the user's latest weight, if it exists.
-    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-
-    HKUnit *unit = [RCTFitKit hkUnitFromOptions:input];
-    if(unit == nil){
-        unit = [HKUnit poundUnit];
+    @try {
+        NSLog(@"jsonResponse %@", jsonResponse);
+        
+        // Remove HKWorkoutActivityType
+        NSString *standarizedActivityType = [jsonResponse[@"body"][@"activity_name"] stringByReplacingOccurrencesOfString:@"HKWorkoutActivityType" withString:@""];
+        
+        // Split and undescore on capital letter
+        standarizedActivityType = [standarizedActivityType stringByReplacingOccurrencesOfString:@"([a-z])([A-Z])"
+                                                                                     withString:@"$1_$2"
+                                                                                        options:NSRegularExpressionSearch
+                                                                                          range:NSMakeRange(0, standarizedActivityType.length)];
+        // Uppercase string
+        standarizedActivityType = [standarizedActivityType uppercaseString];
+        
+        jsonResponse[@"body"][@"activity_name"] = standarizedActivityType;
+    } @catch (NSException *exception) {
+        NSLog(@"Error converting HKActivity to standarized activity %@", exception);
     }
 
-    [self fetchMostRecentQuantitySampleOfType:weightType
-                                    predicate:nil
-                                   completion:^(HKQuantity *mostRecentQuantity, NSDate *startDate, NSDate *endDate, NSError *error) {
-                                       if (!mostRecentQuantity) {
-                                           NSLog(@"error getting latest weight: %@", error);
-                                           callback(@[RCTMakeError(@"error getting latest weight", error, nil)]);
-                                       }
-                                       else {
-                                           // Determine the weight in the required unit.
-                                           double usersWeight = [mostRecentQuantity doubleValueForUnit:unit];
-
-                                           NSDictionary *response = @{
-                                                                      @"value" : @(usersWeight),
-                                                                      @"startDate" : [RCTFitKit buildISO8601StringFromDate:startDate],
-                                                                      @"endDate" : [RCTFitKit buildISO8601StringFromDate:endDate],
-                                                                      };
-
-                                           callback(@[[NSNull null], response]);
-                                       }
-                                   }];
+    return jsonResponse;
 }
 
--(void)workout_retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+-(NSMutableDictionary *)convertSchemaID:(NSMutableDictionary *)jsonResponse
 {
+    @try {
+        // Remove HKWorkoutActivityType
+        NSDictionary *standarizedSchemaID = @{
+                                              @"namespace": @"omh",
+                                              @"name": @"physical-activity",
+                                              @"version": @"1.2",
+                                              };
+        
+        jsonResponse[@"header"][@"schema_id"] = standarizedSchemaID;
+    } @catch (NSException *exception) {
+        NSLog(@"Error converting schema_id to standard schema_id %@", exception);
+    }
     
+    return jsonResponse;
+}
+
+-(void)workout_getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
     HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
     if(distanceUnit == nil){
         distanceUnit = [HKUnit meterUnit];
@@ -55,12 +64,11 @@
         enegryUnit = [HKUnit calorieUnit];
     }
     
-    
-    NSDate *start = [NSDate distantPast];
-    NSDate *end = [NSDate distantFuture];
+    NSDate *startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
+    NSDate *endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
     // 1. Predicate to read only running workouts
     
-    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:start endDate:end options:false];
+    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:false];
     
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
@@ -79,35 +87,30 @@
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               
                                               for (HKQuantitySample *sample in results) {
-                                                  HKWorkout *workout = (HKWorkout *)sample;
                                                   
-                                                  double distance = [workout.totalDistance doubleValueForUnit:distanceUnit];
-                                                  double energy = [workout.totalEnergyBurned doubleValueForUnit:enegryUnit];
-                                                                                                    
-                                                  NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
-                                                  NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
+                                                  OMHSerializer *serializer = [OMHSerializer new];
+                                                  NSString* jsonString = [serializer jsonForSample:sample error:nil];
                                                   
-                                                  NSDictionary *elem = @{
-                                                                         @"distance" : @(distance),
-                                                                         @"energy" : @(energy),
-                                                                         @"duration" : @(workout.duration),
-                                                                         @"type" : @(workout.workoutActivityType),
-                                                                         @"startDate" : startDateString,
-                                                                         @"endDate" : endDateString,
-                                                                         };
+                                                  NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+                                                  NSMutableDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                                                               options:NSJSONReadingMutableContainers
+                                                                                                                 error:nil];
                                                   
-                                                  [data addObject:elem];
+                                                  jsonResponse = [self convertHKActivityType:jsonResponse];
+                                                  jsonResponse = [self convertSchemaID:jsonResponse];
+                                                  [data addObject:jsonResponse];
                                               }
                                               
-                                              callback(@[[NSNull null], data]);
+                                              resolve(data);
                                           });
                                       } else {
-                                          NSLog(@"Error retrieving workouts %@",error);
+                                          NSLog(@"Error retrieving workouts %@", error);
+                                          reject(@"Error retrieving workouts %@", nil, error);
                                       }
                                   }];
     
     // Execute the query
     [self.healthStore executeQuery:sampleQuery];
 }
-    
+
 @end

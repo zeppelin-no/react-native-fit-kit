@@ -31,9 +31,9 @@ RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
     [self isHealthKitAvailable:callback];
 }
 
-RCT_EXPORT_METHOD(initHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(initFitKit:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self initializeHealthKit:input callback:callback];
+    [self initializeHealthKit:input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject];
 }
 
 RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -170,11 +170,10 @@ RCT_EXPORT_METHOD(getBloodGlucoseSamples:(NSDictionary *)input callback:(RCTResp
     [self results_getBloodGlucoseSamples:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self workout_retrieveWorkouts:input callback:callback];
+    [self workout_getActivities:input resolver:resolve rejecter:reject];
 }
-
 
 RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
@@ -192,7 +191,7 @@ RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock
 }
 
 
-- (void)initializeHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+- (void)initializeHealthKit:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     self.healthStore = [[HKHealthStore alloc] init];
 
@@ -215,30 +214,30 @@ RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock
                 writeDataTypes = writePerms;
             }
         } else {
-            callback(@[RCTMakeError(@"permissions must be provided in the initialization options", nil, nil)]);
+            reject(@"need_permissions", @"permissions must be provided in the initialization options", nil);
             return;
         }
 
         // make sure at least 1 read or write permission is provided
         if(!writeDataTypes && !readDataTypes){
-            callback(@[RCTMakeError(@"at least 1 read or write permission must be set in options.permissions", nil, nil)]);
+            reject(@"need_permissions_at_least_1", @"at least 1 read or write permission must be set in options.permissions", nil);
             return;
         }
 
         [self.healthStore requestAuthorizationToShareTypes:writeDataTypes readTypes:readDataTypes completion:^(BOOL success, NSError *error) {
             if (!success) {
                 NSString *errMsg = [NSString stringWithFormat:@"Error with HealthKit authorization: %@", error];
-                NSLog(errMsg);
-                callback(@[RCTMakeError(errMsg, nil, nil)]);
+                NSLog(@"%@", errMsg);
+                reject(@"authorization_error", errMsg, nil);
                 return;
             } else {
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    callback(@[[NSNull null], @true]);
+                    resolve(@YES);
                 });
             }
         }];
     } else {
-        callback(@[RCTMakeError(@"HealthKit data is not available", nil, nil)]);
+        reject(@"health_kit_data_unavailable", @"HealthKit data is not available", nil);
     }
 }
 

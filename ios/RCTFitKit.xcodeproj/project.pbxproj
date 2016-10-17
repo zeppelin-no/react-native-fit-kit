@@ -17,24 +17,28 @@
 		D565F0671DAE1FC200AF118B /* RCTFitKit+Queries.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05B1DAE1FC200AF118B /* RCTFitKit+Queries.m */; };
 		D565F0681DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */; };
 		D565F0691DAE1FC200AF118B /* RCTFitKit+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */; };
-		D565F06A1DAE20F700AF118B /* RCTFitKit.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D565F04C1DAE1FC200AF118B /* RCTFitKit.h */; };
+		D565F06A1DAE20F700AF118B /* RCTFitKit.h in Copy Files */ = {isa = PBXBuildFile; fileRef = D565F04C1DAE1FC200AF118B /* RCTFitKit.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		3774C88B1D2092F20000B3F3 /* CopyFiles */ = {
+		3774C88B1D2092F20000B3F3 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				D565F06A1DAE20F700AF118B /* RCTFitKit.h in CopyFiles */,
+				D565F06A1DAE20F700AF118B /* RCTFitKit.h in Copy Files */,
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3774C88D1D2092F20000B3F3 /* libRCTFitKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTFitKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		41B44EE567C15943C5791551 /* Pods-RCTFitKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTFitKit.release.xcconfig"; path = "Pods/Target Support Files/Pods-RCTFitKit/Pods-RCTFitKit.release.xcconfig"; sourceTree = "<group>"; };
+		95A74AEDF92C001BEFB254DB /* Pods-RCTFitKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTFitKit.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RCTFitKit/Pods-RCTFitKit.debug.xcconfig"; sourceTree = "<group>"; };
+		9782BC629A4123BC3741D2B0 /* libPods-RCTFitKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RCTFitKit.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D565F04C1DAE1FC200AF118B /* RCTFitKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTFitKit.h; path = RCTFitKit/RCTFitKit.h; sourceTree = SOURCE_ROOT; };
 		D565F04D1DAE1FC200AF118B /* RCTFitKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTFitKit.m; path = RCTFitKit/RCTFitKit.m; sourceTree = SOURCE_ROOT; };
 		D565F04E1DAE1FC200AF118B /* RCTFitKit+Methods_Body.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Body.h"; path = "RCTFitKit/RCTFitKit+Methods_Body.h"; sourceTree = SOURCE_ROOT; };
@@ -73,6 +77,8 @@
 			children = (
 				3774C88F1D2092F20000B3F3 /* RCTFitKit */,
 				3774C88E1D2092F20000B3F3 /* Products */,
+				4F55B4D81112AB853A32739D /* Pods */,
+				633231850D2F1F11C24C62E8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,8 +114,24 @@
 				D565F05E1DAE1FC200AF118B /* RCTFitKit+Utils.h */,
 				D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */,
 			);
-			name = RCTFitKit;
 			path = RCTFitKit;
+			sourceTree = "<group>";
+		};
+		4F55B4D81112AB853A32739D /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				95A74AEDF92C001BEFB254DB /* Pods-RCTFitKit.debug.xcconfig */,
+				41B44EE567C15943C5791551 /* Pods-RCTFitKit.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		633231850D2F1F11C24C62E8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9782BC629A4123BC3741D2B0 /* libPods-RCTFitKit.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,7 +143,7 @@
 			buildPhases = (
 				3774C8891D2092F20000B3F3 /* Sources */,
 				3774C88A1D2092F20000B3F3 /* Frameworks */,
-				3774C88B1D2092F20000B3F3 /* CopyFiles */,
+				3774C88B1D2092F20000B3F3 /* Copy Files */,
 			);
 			buildRules = (
 			);
@@ -138,7 +160,7 @@
 		3774C8851D2092F20000B3F3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Greg Wilson";
 				TargetAttributes = {
 					3774C88C1D2092F20000B3F3 = {
@@ -198,8 +220,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -246,8 +270,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -276,13 +302,15 @@
 		};
 		3774C8971D2092F20000B3F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 95A74AEDF92C001BEFB254DB /* Pods-RCTFitKit.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"/Users/mcmhav/r/MotiOneClient/node_modules/react-native/React/**",
+					"${SRCROOT}/../../../ios/Pods/Headers/Public",
+					"${SRCROOT}/../../../ios/Pods/Headers/Public/Granola",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -290,13 +318,15 @@
 		};
 		3774C8981D2092F20000B3F3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 41B44EE567C15943C5791551 /* Pods-RCTFitKit.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"/Users/mcmhav/r/MotiOneClient/node_modules/react-native/React/**",
+					"${SRCROOT}/../../../ios/Pods/Headers/Public",
+					"${SRCROOT}/../../../ios/Pods/Headers/Public/Granola",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};

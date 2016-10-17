@@ -1,0 +1,10 @@
+project 'RCTFitKit.xcodeproj'
+
+# Uncomment this line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'RCTFitKit' do
+  # Pods for RCTFitKit
+
+  pod 'Granola'
+end
