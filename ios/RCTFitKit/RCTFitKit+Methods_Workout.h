@@ -5,9 +5,8 @@
 
 #import "RCTFitKit.h"
 
-@interface RCTFitKit (Methods_Body)
+@interface RCTFitKit (Methods_Workout)
 
-- (void)workout_getLatestWorkout:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
-- (void)workout_retrieveWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)workout_getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject;
 
 @end
