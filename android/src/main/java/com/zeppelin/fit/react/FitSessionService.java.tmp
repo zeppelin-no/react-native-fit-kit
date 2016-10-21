@@ -1,5 +1,0 @@
-import android.app.Service;
-
-public class FitSessionService extends Service {
-
-}

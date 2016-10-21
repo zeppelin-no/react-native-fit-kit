@@ -20,6 +20,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
@@ -48,6 +49,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import android.content.IntentSender;
+
 import static java.text.DateFormat.getTimeInstance;
 
 
@@ -63,6 +66,8 @@ public class FitSessionActivity extends AppCompatActivity {
     private static final String DATE_FORMAT = "yyyy.MM.dd HH:mm:ss";
     private GoogleApiClient mClient = null;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+
+    private boolean authInProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,50 +103,80 @@ public class FitSessionActivity extends AppCompatActivity {
      *  multiple accounts on the device and needing to specify which account to use, etc.
      */
     private void buildFitnessClient() {
+        Log.i(TAG, "building fitnesse client");
+
         // Create the Google API Client
         if (mClient == null && checkPermissions()) {
+            Log.i(TAG, "ready to get crackin'");
+
             mClient = new GoogleApiClient.Builder(this)
                     .addApi(Fitness.HISTORY_API)
                     .addApi(Fitness.SESSIONS_API)
                     .addScope(new Scope(Scopes.FITNESS_LOCATION_READ_WRITE))
                     .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                     .addConnectionCallbacks(
-                            new GoogleApiClient.ConnectionCallbacks() {
-                                @Override
-                                public void onConnected(Bundle bundle) {
-                                    Log.i(TAG, "Connected!!!");
-                                    // Now you can make calls to the Fitness APIs.  What to do?
-                                    // Play with some sessions!!
-                                    new InsertAndVerifySessionTask().execute();
-                                }
+                        new GoogleApiClient.ConnectionCallbacks() {
+                            @Override
+                            public void onConnected(Bundle bundle) {
+                                Log.i(TAG, "Connected!!!");
+                                // Now you can make calls to the Fitness APIs.  What to do?
+                                // Play with some sessions!!
+                                new InsertAndVerifySessionTask().execute();
+                            }
 
-                                @Override
-                                public void onConnectionSuspended(int i) {
-                                    // If your connection to the sensor gets lost at some point,
-                                    // you'll be able to determine the reason and react to it here.
-                                    if (i == ConnectionCallbacks.CAUSE_NETWORK_LOST) {
-                                        Log.i(TAG, "Connection lost.  Cause: Network Lost.");
-                                    } else if (i
-                                            == ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
-                                        Log.i(TAG,
-                                                "Connection lost.  Reason: Service Disconnected");
-                                    }
+                            @Override
+                            public void onConnectionSuspended(int i) {
+                                // If your connection to the sensor gets lost at some point,
+                                // you'll be able to determine the reason and react to it here.
+                                if (i == ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+                                    Log.i(TAG, "Connection lost.  Cause: Network Lost.");
+                                } else if (i
+                                        == ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
+                                    Log.i(TAG,
+                                            "Connection lost.  Reason: Service Disconnected");
                                 }
                             }
-                    )
-                    .enableAutoManage(this, 0, new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult result) {
-                            Log.i(TAG, "Google Play services connection failed. Cause: " +
-                                    result.toString());
-                            Snackbar.make(
-                                    FitSessionActivity.this.findViewById(R.id.main_activity_view),
-                                    "Exception while connecting to Google Play services: " +
-                                            result.getErrorMessage(),
-                                    Snackbar.LENGTH_INDEFINITE).show();
                         }
-                    })
+                    )
+                    .addOnConnectionFailedListener(
+                        new GoogleApiClient.OnConnectionFailedListener() {
+                            @Override
+                            public void onConnectionFailed(ConnectionResult connectionResult) {
+                                // An unresolvable error has occurred and a connection to Google APIs
+                                // could not be established. Display an error message, or handle
+                                // the failure silently
+
+                                Log.i(TAG, "connection failed, will do cool stuff");
+                                if( !authInProgress ) {
+                                    try {
+                                        Log.i(TAG, connectionResult.toString());
+
+                                        authInProgress = true;
+                                        connectionResult.startResolutionForResult( FitSessionActivity.this, 4 );
+                                    } catch(IntentSender.SendIntentException e ) {
+
+                                    }
+                                } else {
+                                    Log.e( "GoogleFit", "authInProgress" );
+                                }
+                            }
+                        }
+                    )
                     .build();
+                    // .enableAutoManage(this, 0, new GoogleApiClient.OnConnectionFailedListener() {
+                    //     @Override
+                    //     public void onConnectionFailed(ConnectionResult result) {
+                    //         Log.i(TAG, "Google Play services connection failed. Cause: " +
+                    //                 result.toString());
+                    //         Snackbar.make(
+                    //                 FitSessionActivity.this.findViewById(R.id.main_activity_view),
+                    //                 "Exception while connecting to Google Play services: " +
+                    //                         result.getErrorMessage(),
+                    //                 Snackbar.LENGTH_INDEFINITE).show();
+                    //     }
+                    // })
+
+            mClient.connect();
         }
     }
 
@@ -448,9 +483,6 @@ public class FitSessionActivity extends AppCompatActivity {
         Log.i(TAG, "Ready");
     }
 
-    /**
-     * Return the current state of the permissions needed.
-     */
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);

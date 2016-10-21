@@ -1,0 +1,22 @@
+package com.zeppelin.fit.react;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+
+import com.google.android.gms.fitness.result.SessionReadResult;
+import com.google.android.gms.fitness.data.Session;
+import com.google.android.gms.fitness.data.DataSet;
+import java.util.List;
+
+public class GoogleFitSessionToOpenMHealth {
+  private SessionReadResult sessionReadResult = null;
+
+  public GoogleFitSessionToOpenMHealth(SessionReadResult sessionReadResult) {
+    this.sessionReadResult = sessionReadResult;
+  }
+
+  public void convert() {
+
+  }
+}
