@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zeppelin.fit.react">
     <application>
-        <activity android:name=".FitSessionActivity" >
-        </activity>
+        <activity android:name=".FitSessionActivity" />
+        <service android:name=".FitSessionService" />
     </application>
 </manifest>
