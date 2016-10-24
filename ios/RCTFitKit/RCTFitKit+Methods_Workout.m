@@ -72,7 +72,7 @@
     
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
-    
+
     // 3. Create the query
     HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKWorkoutType workoutType]
                                                                  predicate:predicate

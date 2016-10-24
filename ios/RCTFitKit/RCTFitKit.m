@@ -175,6 +175,11 @@ RCT_EXPORT_METHOD(getActivities:(NSDictionary *)input resolver:(RCTPromiseResolv
     [self workout_getActivities:input resolver:resolve rejecter:reject];
 }
 
+RCT_EXPORT_METHOD(getBodyMetrics:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_getBodyMetrics:input resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self getModuleInfo:input callback:callback];

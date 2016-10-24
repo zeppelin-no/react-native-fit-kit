@@ -7,7 +7,6 @@
 #import "RCTFitKit+Queries.h"
 #import "RCTFitKit+Utils.h"
 
-
 @implementation RCTFitKit (Methods_Body)
 
 
@@ -58,7 +57,7 @@
         return;
     }
     NSPredicate * predicate = [RCTFitKit predicateForSamplesBetweenDates:startDate endDate:endDate];
-
+    
     [self fetchQuantitySamplesOfType:weightType
                                 unit:unit
                            predicate:predicate
@@ -301,5 +300,158 @@
     }];
 }
 
+- (void)body_fetchQuantitySamplesOfType:(HKQuantityType *)quantityType
+                              unit:(HKUnit *)unit
+                         predicate:(NSPredicate *)predicate
+                         ascending:(BOOL)asc
+                             limit:(NSUInteger)lim
+                        completion:(void (^)(NSArray *, NSError *))completion {
+    
+    NSSortDescriptor *timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate
+                                                                       ascending:asc];
+    
+    // declare the block
+    void (^handlerBlock)(HKSampleQuery *query, NSArray *results, NSError *error);
+    // create and assign the block
+    handlerBlock = ^(HKSampleQuery *query, NSArray *results, NSError *error) {
+        if (!results) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+        
+        if (completion) {
+            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                for (HKQuantitySample *sample in results) {
+                    HKQuantity *quantity = sample.quantity;
+                    double value = [quantity doubleValueForUnit:unit];
+                    
+                    NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
+
+                    NSDictionary *d = @{
+                                        @"HKQuantityTypeIdentifierHeight": @"height",
+                                        @"HKQuantityTypeIdentifierBodyMass": @"bodyMass",
+                                        @"HKQuantityTypeIdentifierBodyMassIndex": @"bodyMassIndex"
+                                        };
+                    
+                    NSString *type = d[sample.sampleType.identifier];
+                    if (!type) {
+                        type = @"other";
+                    }
+                    
+                    if (unit == [HKUnit gramUnit]) {
+                        value = value/1000;
+                    }
+                    
+                    NSDictionary *elem = @{
+                                           type : @(value),
+                                           @"dateTime" : startDateString,
+                                           //@"id": sample.UUID.UUIDString,
+                                           };
+                    
+                    [data addObject:elem];
+                }
+                
+                completion(data, error);
+            });
+        }
+    };
+    
+    
+    HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:quantityType
+                                                           predicate:predicate
+                                                               limit:lim
+                                                     sortDescriptors:@[timeSortDescriptor]
+                                                      resultsHandler:handlerBlock];
+    
+    [self.healthStore executeQuery:query];
+}
+
+
+- (NSArray *)body_getSamples:(NSDictionary *)input quantityType:(HKQuantityType *)quantityType unitType:(HKUnit *)unitType startDate:(NSDate *)startDate endDate:(NSDate *)endDate
+{
+    //HKQuantityType *bmiType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMassIndex];
+    
+    HKUnit *unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:unitType];
+    NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
+    BOOL ascending = [RCTFitKit boolFromOptions:input key:@"ascending" withDefault:false];
+    
+    NSPredicate * predicate = [RCTFitKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+    
+    NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+    
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_enter(group);
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self body_fetchQuantitySamplesOfType:quantityType
+                                     unit:unit
+                                predicate:predicate
+                                ascending:ascending
+                                    limit:limit
+                               completion:^(NSArray *results, NSError *error) {
+                                   if(results){
+                                       NSLog(@"got wight sample");
+                                       [data addObjectsFromArray:results];
+                                   } else {
+                                       NSLog(@"error getting weight samples: %@", error);
+                                   }
+                                   
+                                   dispatch_group_leave(group);
+                               }];
+    });
+    
+    dispatch_group_wait(group,  DISPATCH_TIME_FOREVER);
+    return data;
+}
+
+- (void)body_getBodyMetrics:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    NSDate *startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
+    NSDate *endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    
+    HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
+    if(distanceUnit == nil){
+        distanceUnit = [HKUnit meterUnit];
+    }
+    
+    HKUnit *enegryUnit = [RCTFitKit hkUnitFromOptions:input];
+    if(enegryUnit == nil){
+        enegryUnit = [HKUnit calorieUnit];
+    }
+    
+    HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
+    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+    HKQuantityType *bmiType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMassIndex];
+    HKUnit *lengthUnit = [HKUnit meterUnit];
+    HKUnit *weightUnit = [HKUnit gramUnit];
+    HKUnit *countUnit = [HKUnit countUnit];
+    
+    NSArray *heightSamples = [self body_getSamples:nil quantityType:heightType unitType:lengthUnit startDate:startDate endDate:endDate];
+    NSArray *weightSamples = [self body_getSamples:nil quantityType:weightType unitType:weightUnit startDate:startDate endDate:endDate];
+    NSArray *BMISamples = [self body_getSamples:nil quantityType:bmiType unitType:countUnit startDate:startDate endDate:endDate];
+    
+    
+    NSMutableArray *aggregatedBodySamples = [NSMutableArray arrayWithCapacity:1];
+    
+    [aggregatedBodySamples addObjectsFromArray:heightSamples];
+    [aggregatedBodySamples addObjectsFromArray:weightSamples];
+    [aggregatedBodySamples addObjectsFromArray:BMISamples];
+    
+    NSDictionary *resolveValue = @{
+                          @"bodySamples": aggregatedBodySamples,
+                          @"endDate" : [RCTFitKit buildISO8601StringFromDate:endDate],
+                          };
+    
+    if (heightSamples) {
+        resolve(resolveValue);
+    } else {
+        reject(@"Error %@", nil, nil);
+    }
+}
 
 @end

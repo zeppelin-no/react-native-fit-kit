@@ -422,4 +422,15 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
             promise.reject("getActivities error");
         }
     }
+
+    @ReactMethod
+    public void getBodyMetrics(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getBodyMetrics");
+
+        try {
+            promise.reject("getBodyMetrics coming!");
+        } catch (Error e) {
+            promise.reject("getBodyMetrics error");
+        }
+    }
 }
