@@ -45,8 +45,6 @@
     [self.healthStore executeQuery:query];
 }
 
-
-
 - (void)fetchQuantitySamplesOfType:(HKQuantityType *)quantityType
                               unit:(HKUnit *)unit
                          predicate:(NSPredicate *)predicate
@@ -283,16 +281,6 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
 - (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType *)quantityType
                                           unit:(HKUnit *)unit
                                      startDate:(NSDate *)startDate
@@ -366,17 +354,5 @@
 
     [self.healthStore executeQuery:query];
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 @end
