@@ -25,10 +25,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
-import com.zeppelin.fit.react.common.logger.Log;
-import com.zeppelin.fit.react.common.logger.LogView;
-import com.zeppelin.fit.react.common.logger.LogWrapper;
-import com.zeppelin.fit.react.common.logger.MessageOnlyLogFilter;
+import android.util.Log;
 
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessActivities;
@@ -76,7 +73,7 @@ public class FitSessionActivity extends AppCompatActivity {
 
         // This method sets up our custom logger, which will print all log messages to the device
         // screen, as well as to adb logcat.
-        initializeLogging();
+        // initializeLogging();
 
         // When permissions are revoked the app is restarted so onCreate is sufficient to check for
         // permissions core to the Activity's functionality.
@@ -463,25 +460,25 @@ public class FitSessionActivity extends AppCompatActivity {
     /**
      *  Initialize a custom log class that outputs both to in-app targets and logcat.
      */
-    private void initializeLogging() {
-        // Wraps Android's native log framework.
-        LogWrapper logWrapper = new LogWrapper();
-        // Using Log, front-end to the logging chain, emulates android.util.log method signatures.
-        Log.setLogNode(logWrapper);
-        // Filter strips out everything except the message text.
-        MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
-        logWrapper.setNext(msgFilter);
-        // On screen logging via a customized TextView.
-        LogView logView = (LogView) findViewById(R.id.sample_logview);
+    // private void initializeLogging() {
+    //     // Wraps Android's native log framework.
+    //     LogWrapper logWrapper = new LogWrapper();
+    //     // Using Log, front-end to the logging chain, emulates android.util.log method signatures.
+    //     Log.setLogNode(logWrapper);
+    //     // Filter strips out everything except the message text.
+    //     MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
+    //     logWrapper.setNext(msgFilter);
+    //     // On screen logging via a customized TextView.
+    //     LogView logView = (LogView) findViewById(R.id.sample_logview);
 
-        // Fixing this lint errors adds logic without benefit.
-        //noinspection AndroidLintDeprecation
-        logView.setTextAppearance(this, R.style.Log);
+    //     // Fixing this lint errors adds logic without benefit.
+    //     //noinspection AndroidLintDeprecation
+    //     logView.setTextAppearance(this, R.style.Log);
 
-        logView.setBackgroundColor(Color.WHITE);
-        msgFilter.setNext(logView);
-        Log.i(TAG, "Ready");
-    }
+    //     logView.setBackgroundColor(Color.WHITE);
+    //     msgFilter.setNext(logView);
+    //     Log.i(TAG, "Ready");
+    // }
 
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
