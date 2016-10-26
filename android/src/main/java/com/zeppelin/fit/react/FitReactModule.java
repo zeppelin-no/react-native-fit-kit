@@ -597,4 +597,16 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
 
         readBodyMetrics(promise, startDate);
     }
+
+    @ReactMethod
+    public void startBackgroundSync(ReadableMap options, Promise promise) {
+        Log.i(TAG, "startBackgroundSync");
+
+        try {
+            promise.resolve("started, nothahhh");
+        } catch(Exception e) {
+            promise.reject("error starting backgroundSync");
+        }
+
+    }
 }
