@@ -67,8 +67,24 @@ import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.Field;
 import java.util.concurrent.TimeUnit;
 import com.google.android.gms.fitness.data.DataSet;
-import java.util.List;
 import static java.text.DateFormat.getTimeInstance;
+
+
+// bodymetrics
+import com.patloew.rxfit.RxFit;
+import rx.Observable;
+import rx.Single;
+import rx.functions.Func1;
+import java.util.List;
+import com.google.android.gms.fitness.data.Subscription;
+import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.request.DataReadRequest;
+import com.google.android.gms.fitness.result.DataReadResult;
+import rx.Observer;
+
+import com.google.android.gms.common.api.Api;
+import java.sql.Timestamp;
+import java.util.TimeZone;
 
 class FitReactModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     private Context context;
@@ -297,15 +313,17 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
             WritableArray activities = Arguments.createArray();
 
             for (Session session : sessionReadResult.getSessions()) {
-                dumpSession(session);
-                List<DataSet> dataSets = sessionReadResult.getDataSet(session);
-                // for (DataSet dataSet : dataSets) {
-                //     dumpDataSet(dataSet);
-                // }
 
                 String activityName = getActivityName(session.getActivity());
 
                 if (activityName != "IGNORE") {
+                    dumpSession(session);
+                    List<DataSet> dataSets = sessionReadResult.getDataSet(session);
+                    WritableMap dataSetMap = Arguments.createMap();
+                    for (DataSet dataSet : dataSets) {
+                        dataSetMap.merge(handleDataSet(dataSet));
+                    }
+
                     WritableMap activity = Arguments.createMap();
                     WritableMap activityHeader = Arguments.createMap();
                     WritableMap activityBody = Arguments.createMap();
@@ -325,10 +343,10 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
                     // body
                     WritableMap effectiveTimeFrame = Arguments.createMap();
                     activityBody.putString("activity_name", activityName);
-                    if (session.hasActiveTime()) {
+                    if (startTime != endTime) {
                         WritableMap duration = Arguments.createMap();
                         duration.putString("unit", "sec");
-                        duration.putInt("value", (int) (long) session.getActiveTime(TimeUnit.SECONDS));
+                        duration.putInt("value", (int) (long) (session.getEndTime(TimeUnit.SECONDS) - session.getStartTime(TimeUnit.SECONDS)));
                         activityBody.putMap("duration", duration);
 
                         WritableMap timeInterval = Arguments.createMap();
@@ -339,6 +357,7 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
                         effectiveTimeFrame.putString("date_time", startTime);
                     }
                     activityBody.putMap("effective_time_frame", effectiveTimeFrame);
+                    activityBody.merge(dataSetMap);
 
                     activity.putMap("header", activityHeader);
                     activity.putMap("body", activityBody);
@@ -368,7 +387,7 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
         SessionReadRequest readRequest = new SessionReadRequest.Builder()
                 .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS)
                 .read(DataType.TYPE_DISTANCE_DELTA)
-                .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
+                // .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
                 .readSessionsFromAllApps()
                 .build();
         // [END build_read_session_request]
@@ -376,18 +395,53 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
         return readRequest;
     }
 
-    private void dumpDataSet(DataSet dataSet) {
+    private WritableMap handleDataSet(DataSet dataSet) {
         Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
+
+        WritableMap dataSetMap = Arguments.createMap();
+
         for (DataPoint dp : dataSet.getDataPoints()) {
             DateFormat dateFormat = getTimeInstance();
-            Log.i(TAG, "Data point:");
-            Log.i(TAG, "\tType: " + dp.getDataType().getName());
-            Log.i(TAG, "\tStart: " + dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
-            Log.i(TAG, "\tEnd: " + dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)));
+            // Log.i(TAG, "\tData point:");
+            // Log.i(TAG, "\t\tType: " + dp.getDataType().getName());
+            // Log.i(TAG, "\t\tStart: " + dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+            // Log.i(TAG, "\t\tEnd: " + dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)));
             for(Field field : dp.getDataType().getFields()) {
-                Log.i(TAG, "\tField: " + field.getName() + " Value: " + dp.getValue(field));
+                // Log.i(TAG, "\t\t\tField: " + field.getName() + " Value: " + dp.getValue(field));
+                WritableMap fieldMap = Arguments.createMap();
+
+                switch (field.getName()) {
+                    case "distance":
+                        fieldMap.putString("unit", "km");
+                        fieldMap.putDouble("value", dp.getValue(field).asFloat() / 1000);
+                        dataSetMap.putMap("distance", fieldMap);
+                        break;
+                    default:
+                        fieldMap.putString("value", dp.getValue(field).toString());
+                        dataSetMap.putMap(field.getName(), fieldMap);
+                }
+
+                // switch (dp.getValue(field).getClass().getName()) {
+                //     case "java.lang.Boolean":
+                //         fieldMap.putBoolean("value", (Boolean) dp.getValue(field));
+                //         break;
+                //     case "java.lang.Integer":
+                //         fieldMap.putInt("value", (Integer) dp.getValue(field));
+                //         break;
+                //     case "java.lang.Double":
+                //         fieldMap.putDouble("value", (Double) dp.getValue(field));
+                //         break;
+                //     case "java.lang.String":
+                //         break;
+                //     case "com.facebook.react.bridge.WritableNativeMap":
+                //         fieldMap.putMap("value", (WritableMap) dp.getValue(field));
+                //         break;
+                // }
+
             }
         }
+
+        return dataSetMap;
     }
 
     private void dumpSession(Session session) {
@@ -423,14 +477,124 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
         }
     }
 
+    // private class ReadBodyMetricsHistory extends AsyncTask<Void, Void, Void> {
+    //     protected Void doInBackground(Void... params) {
+
+    //     }
+    // }
+
+    private Observable fu(DataReadResult dataReadResult) {
+        return Observable.from(dataReadResult.getBuckets());
+    }
+
+    private void readBodyMetrics(Promise promise) {
+        readBodyMetrics(promise, 1);
+    }
+
+    private void readBodyMetrics(final Promise promise, long startTime) {
+
+        RxFit rxFit = new RxFit(
+            context,
+            new Api[] { Fitness.HISTORY_API },
+            new Scope[] {
+                new Scope(Scopes.FITNESS_ACTIVITY_READ),
+                new Scope(Scopes.FITNESS_BODY_READ)
+            }
+        );
+
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        final long endTime = cal.getTimeInMillis();
+
+        DataReadRequest dataReadRequest = new DataReadRequest.Builder()
+            .read(DataType.TYPE_WEIGHT)
+            .read(DataType.TYPE_HEIGHT)
+            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+            .build();
+
+        final WritableArray bodySamples = Arguments.createArray();
+        final WritableMap bodyMetrics = Arguments.createMap();
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+
+        rxFit.history().read(dataReadRequest)
+            .flatMapObservable(new Func1<DataReadResult, Observable<DataSet>>() {
+                    @Override
+                    public Observable<DataSet> call(DataReadResult dataReadResult) {
+                        // return Observable.from(dataReadResult.getBuckets());
+                        return Observable.from(dataReadResult.getDataSets());
+                    }
+                })
+            .subscribe(new Observer<DataSet>() {
+                @Override
+                public void onCompleted() {
+                    Log.i(TAG, "Observable done!");
+                    bodyMetrics.putArray("bodySamples", bodySamples);
+                    bodyMetrics.putString("endDate", dateFormat.format(endTime));
+                    promise.resolve(bodyMetrics);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e(TAG, "ooops error");
+                    e.printStackTrace();
+                    promise.reject("getBodyMetrics error!");
+                }
+
+                @Override
+                public void onNext(DataSet dataSet) {
+                    Log.i(TAG, "Data returned for Data type: " + dataSet);
+
+                    for (DataPoint dp : dataSet.getDataPoints()) {
+                        String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));
+                        for(Field field : dp.getDataType().getFields()) {
+                            WritableMap bodyMetric = Arguments.createMap();
+
+                            switch (field.getName()) {
+                                case "weight":
+                                    bodyMetric.putDouble("bodyMass", dp.getValue(field).asFloat());
+                                    bodyMetric.putString("dateTime", dateTime);
+                                    bodySamples.pushMap(bodyMetric);
+                                    break;
+                                case "height":
+                                    bodyMetric.putDouble("height", dp.getValue(field).asFloat());
+                                    bodyMetric.putString("dateTime", dateTime);
+                                    bodySamples.pushMap(bodyMetric);
+                                    break;
+                            }
+
+                        }
+                    }
+                }
+            });
+    }
+
+    private long getStartDate(String startDateString) {
+        long startDate = 1;
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Date parsedDate = dateFormat.parse(startDateString);
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            startDate = timestamp.getTime();
+        } catch(Exception e) {
+            Log.e(TAG, "error with the startDate string, using 1");
+            e.printStackTrace();
+        }
+
+        return startDate;
+    }
+
     @ReactMethod
     public void getBodyMetrics(ReadableMap options, Promise promise) {
         Log.i(TAG, "getBodyMetrics");
 
-        try {
-            promise.reject("getBodyMetrics coming!");
-        } catch (Error e) {
-            promise.reject("getBodyMetrics error");
+        long startDate = 1;
+
+        if (options.hasKey("startDate") && !options.isNull("startDate")) {
+            startDate = getStartDate(options.getString("startDate"));
         }
+
+        readBodyMetrics(promise, startDate);
     }
 }
