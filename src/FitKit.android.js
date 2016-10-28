@@ -19,6 +19,7 @@ const initFitKit = options => {
         reject(false);
       }
     } catch (e) {
+      reject(false);
       console.log('ojda');
     }
   });
