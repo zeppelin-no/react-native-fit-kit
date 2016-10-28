@@ -77,7 +77,7 @@ public class FitJobService extends JobService {
 
         if (promise != null) {
             Log.i(TAG, "has a promise: " + promise);
-            new FitBodyMetricsService(promise, startDate, this);
+            // new FitBodyMetricsService(promise, startDate, this);
         } else {
             Log.i(TAG, "aint got a promise, bor");
         }

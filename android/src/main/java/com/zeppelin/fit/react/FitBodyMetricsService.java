@@ -17,13 +17,14 @@ import rx.functions.Func1;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.result.DataReadResult;
 import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.Field;
+
+import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.common.api.Api;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.Scope;
 
 import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
@@ -33,10 +34,12 @@ import java.util.Calendar;
 public class FitBodyMetricsService {
 // public class FitBodyMetricsService extends IntentService {
 
+    private RxFit rxFit;
     public static final String TAG = "RCTFitKit";
 
-    public FitBodyMetricsService(Promise promise, long startTime, Context context) {
+    public FitBodyMetricsService(RxFit rxFit, Promise promise, long startTime, Context context) {
         // super(FitBodyMetricsService.class.getName());
+        this.rxFit = rxFit;
         readBodyMetrics(promise, startTime, context);
     }
 
@@ -46,15 +49,6 @@ public class FitBodyMetricsService {
     // }
 
     private void readBodyMetrics(final Promise promise, long startTime, Context context) {
-        RxFit rxFit = new RxFit(
-            context,
-            new Api[] { Fitness.HISTORY_API },
-            new Scope[] {
-                new Scope(Scopes.FITNESS_ACTIVITY_READ),
-                new Scope(Scopes.FITNESS_BODY_READ)
-            }
-        );
-
         Calendar cal = Calendar.getInstance();
         Date now = new Date();
         cal.setTime(now);
