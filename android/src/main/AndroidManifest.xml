@@ -2,6 +2,8 @@
     package="com.zeppelin.fit.react">
     <application>
         <activity android:name=".FitSessionActivity" />
-        <service android:name=".FitSessionService" />
+        <service android:name=".FitBodyMetricsService" />
+        <service android:name=".FitJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

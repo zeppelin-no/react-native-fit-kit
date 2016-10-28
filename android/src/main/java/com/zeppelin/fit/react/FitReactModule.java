@@ -60,10 +60,11 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.HashMap;
 // import java.time.format.DateTimeFormatter;
+import java.util.List;
+import com.google.android.gms.fitness.data.DataPoint;
 
 // Log related:
 import java.text.DateFormat;
-import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.Field;
 import java.util.concurrent.TimeUnit;
 import com.google.android.gms.fitness.data.DataSet;
@@ -71,20 +72,27 @@ import static java.text.DateFormat.getTimeInstance;
 
 
 // bodymetrics
-import com.patloew.rxfit.RxFit;
-import rx.Observable;
-import rx.Single;
-import rx.functions.Func1;
-import java.util.List;
-import com.google.android.gms.fitness.data.Subscription;
-import com.google.android.gms.fitness.data.Bucket;
-import com.google.android.gms.fitness.request.DataReadRequest;
-import com.google.android.gms.fitness.result.DataReadResult;
-import rx.Observer;
+// import rx.Single;
 
-import com.google.android.gms.common.api.Api;
 import java.sql.Timestamp;
 import java.util.TimeZone;
+
+// background service
+import android.app.job.JobParameters;
+import android.os.Messenger;
+import android.os.Message;
+import android.os.Handler;
+import android.os.Looper;
+
+import android.app.job.JobScheduler;
+import android.app.job.JobInfo;
+import android.content.ComponentName;
+import android.content.Context;
+import android.widget.Toast;
+
+import com.zeppelin.fit.react.FitJobService;
+import com.zeppelin.fit.react.FitBodyMetricsService;
+
 
 class FitReactModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     private Context context;
@@ -95,6 +103,10 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
 
     static final int FIT_API_REQUEST_CODE = 4;
     static final int RESULT_OK = 100;
+
+    public static final int MSG_SERVICE_OBJ = 2;
+    public static final int MSG_UNCOLOUR_START = 0;
+    public static final int MSG_UNCOLOUR_STOP = 1;
 
     private GoogleApiClient mClient = null;
     private boolean authInProgress = false;
@@ -454,6 +466,11 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
 
     @ReactMethod
     public void getActivities(ReadableMap options, Promise promise) {
+        Log.i(TAG, "");
+        Log.i(TAG, "");
+        Log.i(TAG, "");
+        Log.i(TAG, "");
+        Log.i(TAG, "");
         Log.i(TAG, "getActivities");
 
         try {
@@ -477,103 +494,12 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
         }
     }
 
-    // private class ReadBodyMetricsHistory extends AsyncTask<Void, Void, Void> {
-    //     protected Void doInBackground(Void... params) {
-
-    //     }
-    // }
-
-    private Observable fu(DataReadResult dataReadResult) {
-        return Observable.from(dataReadResult.getBuckets());
-    }
-
-    private void readBodyMetrics(Promise promise) {
-        readBodyMetrics(promise, 1);
-    }
-
-    private void readBodyMetrics(final Promise promise, long startTime) {
-
-        RxFit rxFit = new RxFit(
-            context,
-            new Api[] { Fitness.HISTORY_API },
-            new Scope[] {
-                new Scope(Scopes.FITNESS_ACTIVITY_READ),
-                new Scope(Scopes.FITNESS_BODY_READ)
-            }
-        );
-
-        Calendar cal = Calendar.getInstance();
-        Date now = new Date();
-        cal.setTime(now);
-        final long endTime = cal.getTimeInMillis();
-
-        DataReadRequest dataReadRequest = new DataReadRequest.Builder()
-            .read(DataType.TYPE_WEIGHT)
-            .read(DataType.TYPE_HEIGHT)
-            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-            .build();
-
-        final WritableArray bodySamples = Arguments.createArray();
-        final WritableMap bodyMetrics = Arguments.createMap();
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-
-        rxFit.history().read(dataReadRequest)
-            .flatMapObservable(new Func1<DataReadResult, Observable<DataSet>>() {
-                    @Override
-                    public Observable<DataSet> call(DataReadResult dataReadResult) {
-                        // return Observable.from(dataReadResult.getBuckets());
-                        return Observable.from(dataReadResult.getDataSets());
-                    }
-                })
-            .subscribe(new Observer<DataSet>() {
-                @Override
-                public void onCompleted() {
-                    Log.i(TAG, "Observable done!");
-                    bodyMetrics.putArray("bodySamples", bodySamples);
-                    bodyMetrics.putString("endDate", dateFormat.format(endTime));
-                    promise.resolve(bodyMetrics);
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.e(TAG, "ooops error");
-                    e.printStackTrace();
-                    promise.reject("getBodyMetrics error!");
-                }
-
-                @Override
-                public void onNext(DataSet dataSet) {
-                    Log.i(TAG, "Data returned for Data type: " + dataSet);
-
-                    for (DataPoint dp : dataSet.getDataPoints()) {
-                        String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));
-                        for(Field field : dp.getDataType().getFields()) {
-                            WritableMap bodyMetric = Arguments.createMap();
-
-                            switch (field.getName()) {
-                                case "weight":
-                                    bodyMetric.putDouble("bodyMass", dp.getValue(field).asFloat());
-                                    bodyMetric.putString("dateTime", dateTime);
-                                    bodySamples.pushMap(bodyMetric);
-                                    break;
-                                case "height":
-                                    bodyMetric.putDouble("height", dp.getValue(field).asFloat());
-                                    bodyMetric.putString("dateTime", dateTime);
-                                    bodySamples.pushMap(bodyMetric);
-                                    break;
-                            }
-
-                        }
-                    }
-                }
-            });
-    }
-
     private long getStartDate(String startDateString) {
         long startDate = 1;
         try {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            // dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             Date parsedDate = dateFormat.parse(startDateString);
             Timestamp timestamp = new Timestamp(parsedDate.getTime());
             startDate = timestamp.getTime();
@@ -585,6 +511,8 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
         return startDate;
     }
 
+    private FitBodyMetricsService mReceiver;
+
     @ReactMethod
     public void getBodyMetrics(ReadableMap options, Promise promise) {
         Log.i(TAG, "getBodyMetrics");
@@ -595,6 +523,100 @@ class FitReactModule extends ReactContextBaseJavaModule implements ActivityEvent
             startDate = getStartDate(options.getString("startDate"));
         }
 
-        readBodyMetrics(promise, startDate);
+        new FitBodyMetricsService(promise, startDate, context);
+    }
+
+    public void onReceivedStartJob(JobParameters params) {
+        Log.i(TAG, "onReceivedStartJob");
+    }
+
+    public void onReceivedStopJob() {
+        Log.i(TAG, "onReceivedStopJob");
+    }
+
+    AsyncBackgroundSyncHandler yolo;
+
+    @ReactMethod
+    public void nextSync(ReadableMap options, Promise promise) {
+        promise.reject("comming l8er");
+        if (false) {
+            Log.i(TAG, "nextSync");
+            if (yolo != null) {
+                yolo.nextSync(promise);
+            }
+        }
+    }
+
+    @ReactMethod
+    public void startBackgroundSync(ReadableMap options, Promise promise) {
+        promise.reject("comming l8er");
+        if (false) {
+            Log.i(TAG, "startBackgroundSync");
+
+            yolo = new AsyncBackgroundSyncHandler(promise, context);
+
+            yolo.execute();
+        }
+    }
+
+    private class AsyncBackgroundSyncHandler extends AsyncTask<Void, Void, Void> {
+
+        private Promise promise;
+        private long startTime = 1;
+        private Context context;
+        private FitJobService mFitJobService;
+        private static final int MYJOBID = 1;
+
+        public AsyncBackgroundSyncHandler(Promise promise, Context context) {
+            this.promise = promise;
+            this.context = context;
+        }
+
+        public void nextSync(Promise promise) {
+            mFitJobService.nextSync(promise);
+        }
+
+        Handler mHandler = new Handler(/* default looper */) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_UNCOLOUR_START:
+                        Log.i(TAG, "MSG_UNCOLOUR_START");
+                        // mShowStartView.setBackgroundColor(defaultColor);
+                        break;
+                    case MSG_UNCOLOUR_STOP:
+                        Log.i(TAG, "MSG_UNCOLOUR_STOP");
+                        // mShowStopView.setBackgroundColor(defaultColor);
+                        break;
+                    case MSG_SERVICE_OBJ:
+                        Log.i(TAG, "MSG_SERVICE_OBJ");
+                        mFitJobService = (FitJobService) msg.obj;
+                        ComponentName jobService = new ComponentName(context, FitJobService.class.getName());
+                        JobInfo jobInfo = new JobInfo.Builder(MYJOBID, jobService).setPeriodic(10000).build();
+                        mFitJobService.scheduleJob(jobInfo, promise, startTime);
+                        // mTestService.setUiCallback(MainActivity.this);
+                        break;
+                }
+            }
+        };
+
+        protected Void doInBackground(Void... params) {
+            Log.i(TAG, "doing backgorun stuff");
+
+            Intent startServiceIntent = new Intent(context, FitJobService.class);
+            startServiceIntent.putExtra("messenger", new Messenger(mHandler));
+            context.startService(startServiceIntent);
+
+
+            // ComponentName jobService = new ComponentName(context, FitJobService.class.getName());
+            // JobInfo jobInfo = new JobInfo.Builder(MYJOBID, jobService).setPeriodic(10000).build();
+
+            // JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+            // int jobId = jobScheduler.schedule(jobInfo);
+            // Log.i(TAG, "jobId " + jobId);
+
+            return null;
+        }
     }
 }
