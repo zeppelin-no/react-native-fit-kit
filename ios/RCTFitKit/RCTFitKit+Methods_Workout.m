@@ -54,6 +54,11 @@
 
 -(void)workout_getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
+    
+    [self sendEventWithName:@"horhor" body:@"yalla"];
+    
+    
+    
     HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
     if(distanceUnit == nil){
         distanceUnit = [HKUnit meterUnit];

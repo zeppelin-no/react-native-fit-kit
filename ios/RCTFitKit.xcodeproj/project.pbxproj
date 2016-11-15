@@ -18,6 +18,7 @@
 		D565F0681DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */; };
 		D565F0691DAE1FC200AF118B /* RCTFitKit+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */; };
 		D565F06A1DAE20F700AF118B /* RCTFitKit.h in Copy Files */ = {isa = PBXBuildFile; fileRef = D565F04C1DAE1FC200AF118B /* RCTFitKit.h */; };
+		D56976611DDB2C2900F34939 /* RCTFitKit+Events.m in Sources */ = {isa = PBXBuildFile; fileRef = D56976601DDB2C2900F34939 /* RCTFitKit+Events.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,8 @@
 		D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+TypesAndPermissions.m"; path = "RCTFitKit/RCTFitKit+TypesAndPermissions.m"; sourceTree = SOURCE_ROOT; };
 		D565F05E1DAE1FC200AF118B /* RCTFitKit+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Utils.h"; path = "RCTFitKit/RCTFitKit+Utils.h"; sourceTree = SOURCE_ROOT; };
 		D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTFitKit+Utils.m"; path = "RCTFitKit/RCTFitKit+Utils.m"; sourceTree = SOURCE_ROOT; };
+		D569765F1DDB2C0D00F34939 /* RCTFitKit+Events.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RCTFitKit+Events.h"; sourceTree = "<group>"; };
+		D56976601DDB2C2900F34939 /* RCTFitKit+Events.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTFitKit+Events.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +116,8 @@
 				D565F05D1DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m */,
 				D565F05E1DAE1FC200AF118B /* RCTFitKit+Utils.h */,
 				D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */,
+				D569765F1DDB2C0D00F34939 /* RCTFitKit+Events.h */,
+				D56976601DDB2C2900F34939 /* RCTFitKit+Events.m */,
 			);
 			path = RCTFitKit;
 			sourceTree = "<group>";
@@ -200,6 +205,7 @@
 				D565F0661DAE1FC200AF118B /* RCTFitKit+Methods_Workout.m in Sources */,
 				D565F0621DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m in Sources */,
 				D565F0611DAE1FC200AF118B /* RCTFitKit+Methods_Body.m in Sources */,
+				D56976611DDB2C2900F34939 /* RCTFitKit+Events.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
