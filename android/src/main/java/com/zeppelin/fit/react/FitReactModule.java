@@ -35,6 +35,8 @@ import android.app.job.JobScheduler;
 import com.zeppelin.fit.react.FitJobService;
 import com.zeppelin.fit.react.FitBodyMetricsService;
 import com.zeppelin.fit.react.FitActivitiesService;
+import com.zeppelin.fit.react.FitStepService;
+import com.zeppelin.fit.react.FitStepObserver;
 
 // rx fit:
 import com.google.android.gms.fitness.Fitness;
@@ -88,6 +90,7 @@ class FitReactModule extends ReactContextBaseJavaModule {
                 new Api[] {
                     Fitness.HISTORY_API,
                     Fitness.SESSIONS_API,
+                    Fitness.SENSORS_API,
                 },
                 new Scope[] {
                     new Scope(Scopes.FITNESS_LOCATION_READ_WRITE),
@@ -175,6 +178,40 @@ class FitReactModule extends ReactContextBaseJavaModule {
 
         if (rxFit != null) {
             new FitBodyMetricsService(rxFit, promise, startDate, context);
+        } else {
+            promise.reject("must init first");
+        }
+    }
+
+    @ReactMethod
+    public void getDailySteps(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getDailySteps");
+
+        long startDate = 1;
+
+        if (options.hasKey("startDate") && !options.isNull("startDate")) {
+            startDate = getStartDate(options.getString("startDate"));
+        }
+
+        if (rxFit != null) {
+            new FitStepService(rxFit, promise, startDate, context);
+        } else {
+            promise.reject("must init first");
+        }
+    }
+
+    @ReactMethod
+    public void initStepCountObserver(ReadableMap options, Promise promise) {
+        Log.i(TAG, "initStepCountObserver");
+
+        long startDate = 1;
+
+        if (options.hasKey("startDate") && !options.isNull("startDate")) {
+            startDate = getStartDate(options.getString("startDate"));
+        }
+
+        if (rxFit != null) {
+            new FitStepObserver(rxFit, promise, startDate, context);
         } else {
             promise.reject("must init first");
         }
