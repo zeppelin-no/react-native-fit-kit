@@ -77,7 +77,7 @@ public class FitBodyMetricsService {
                 public void onError(Throwable e) {
                     Log.e(TAG, "ooops error");
                     e.printStackTrace();
-                    promise.reject("getBodyMetrics error!");
+                    promise.reject("getBodyMetrics error!", e);
                 }
 
                 @Override

@@ -1,6 +1,5 @@
 package com.zeppelin.fit.react;
 
-// import android.app.IntentService;
 // import android.content.Intent;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableArray;
@@ -38,130 +37,119 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
 
+// sensor:
+import android.content.Intent;
+import android.app.PendingIntent;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.fitness.request.SensorRequest;
+import rx.Single;
+import rx.functions.Action1;
+import com.google.android.gms.fitness.request.OnDataPointListener;
+import android.app.IntentService;
+
+// import com.zeppelin.fit.react.FitStepIntentService;
+// import android.widget.Toast;
+
+import com.google.android.gms.fitness.data.Value;
+
+// react event
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
 public class FitStepObserver {
 
     private RxFit rxFit;
+    private Context context;
     public static final String TAG = "RCTFitKit";
 
     public FitStepObserver(RxFit rxFit, Promise promise, long startTime, Context context) {
         this.rxFit = rxFit;
+        this.context = context;
         init(promise, startTime, context);
+    }
+
+    private void registerFitnessDataListener(DataSource dataSource, DataType dataType) {
+        Log.i(TAG, "registerFitnessDataListener!!");
+
+        SensorRequest sensorRequest = new SensorRequest.Builder()
+            .setDataSource(dataSource)
+            .setDataType(dataType)
+            .setSamplingRate(1, TimeUnit.SECONDS)
+            .build();
+
+        rxFit.sensors().getDataPoints(sensorRequest)
+            .subscribe(new Observer<DataPoint>() {
+                @Override
+                public void onCompleted() {
+                    Log.i(TAG, "getDataPoints(sensorRequest) Observable done! :(");
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e(TAG, "ooops error");
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+
+                @Override
+                public void onNext(DataPoint dataPoint) {
+                    Log.i(TAG, "hoooooooooooo");
+
+                    WritableMap eventData = Arguments.createMap();
+
+                    ReactContext reactContext = (ReactContext) context;
+
+                    for (Field field : dataPoint.getDataType().getFields()) {
+                        Value val = dataPoint.getValue(field);
+                        Log.i(TAG, "Detected DataPoint field: " + field.getName());
+                        Log.i(TAG, "Detected DataPoint value: " + val);
+                        switch (field.getName()) {
+                            case "steps":
+                                eventData.putInt("steps", val.asInt());
+                                break;
+                        }
+                        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("YouCustomEventName", eventData);
+                    }
+                }
+            });
     }
 
     private void init(final Promise promise, long startTime, Context context) {
         Log.i(TAG, "init FitStepObserver");
-        // Calendar cal = Calendar.getInstance();
-        // Date now = new Date();
-        // cal.setTime(now);
-        // final long endTime = cal.getTimeInMillis();
-
-        // DataReadRequest dataReadRequest = new DataReadRequest.Builder()
-        //     .read(DataType.TYPE_WEIGHT)
-        //     .read(DataType.TYPE_HEIGHT)
-        //     .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-        //     .build();
 
         DataSourcesRequest dataSourcesRequest = new DataSourcesRequest.Builder()
+            .setDataSourceTypes(DataSource.TYPE_DERIVED)
+            // .setDataSourceTypes(DataSource.TYPE_RAW)
             .setDataTypes(DataType.TYPE_STEP_COUNT_DELTA)
-            .setDataSourceTypes(DataSource.TYPE_RAW)
             .build();
-
-        // final WritableArray bodySamples = Arguments.createArray();
-        // final WritableMap bodyMetrics = Arguments.createMap();
-        // final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
         rxFit.sensors().findDataSources(dataSourcesRequest)
             .subscribe(new Observer<DataSource>() {
                 @Override
                 public void onCompleted() {
                     Log.i(TAG, "Observable done!");
-                    // bodyMetrics.putArray("bodySamples", bodySamples);
-                    // bodyMetrics.putString("endDate", dateFormat.format(endTime));
-                    // promise.resolve(bodyMetrics);
+                    promise.resolve("weeee");
                 }
 
                 @Override
                 public void onError(Throwable e) {
                     Log.e(TAG, "ooops error");
-                    e.printStackTrace();
-                    // promise.reject("getBodyMetrics error!");
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    promise.reject("error livetracking!", e);
                 }
 
                 @Override
                 public void onNext(DataSource dataSource) {
                     Log.i(TAG, "Data returned for Data type: " + dataSource);
 
-                    // for (DataPoint dp : dataSet.getDataPoints()) {
-                    //     String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));
-                    //     for(Field field : dp.getDataType().getFields()) {
-                    //         WritableMap bodyMetric = Arguments.createMap();
-
-                    //         switch (field.getName()) {
-                    //             case "weight":
-                    //                 bodyMetric.putDouble("bodyMass", dp.getValue(field).asFloat());
-                    //                 bodyMetric.putString("dateTime", dateTime);
-                    //                 bodySamples.pushMap(bodyMetric);
-                    //                 break;
-                    //             case "height":
-                    //                 bodyMetric.putDouble("height", dp.getValue(field).asFloat());
-                    //                 bodyMetric.putString("dateTime", dateTime);
-                    //                 bodySamples.pushMap(bodyMetric);
-                    //                 break;
-                    //         }
-
-                    //     }
-                    // }
+                    if (dataSource.getDataType().equals(DataType.TYPE_STEP_COUNT_DELTA)) {
+                        Log.i(TAG, "daym!!");
+                        registerFitnessDataListener(dataSource, dataSource.getDataType());
+                    }
                 }
             });
-
-        // // rxFit.sensors().read(dataReadRequest)
-        //     .flatMapObservable(new Func1<DataReadResult, Observable<DataSet>>() {
-        //             @Override
-        //             public Observable<DataSet> call(DataReadResult dataReadResult) {
-        //                 return Observable.from(dataReadResult.getDataSets());
-        //             }
-        //         })
-        //     .subscribe(new Observer<DataSet>() {
-        //         @Override
-        //         public void onCompleted() {
-        //             Log.i(TAG, "Observable done!");
-        //             bodyMetrics.putArray("bodySamples", bodySamples);
-        //             bodyMetrics.putString("endDate", dateFormat.format(endTime));
-        //             promise.resolve(bodyMetrics);
-        //         }
-
-        //         @Override
-        //         public void onError(Throwable e) {
-        //             Log.e(TAG, "ooops error");
-        //             e.printStackTrace();
-        //             promise.reject("getBodyMetrics error!");
-        //         }
-
-        //         @Override
-        //         public void onNext(DataSet dataSet) {
-        //             Log.i(TAG, "Data returned for Data type: " + dataSet);
-
-        //             for (DataPoint dp : dataSet.getDataPoints()) {
-        //                 String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));
-        //                 for(Field field : dp.getDataType().getFields()) {
-        //                     WritableMap bodyMetric = Arguments.createMap();
-
-        //                     switch (field.getName()) {
-        //                         case "weight":
-        //                             bodyMetric.putDouble("bodyMass", dp.getValue(field).asFloat());
-        //                             bodyMetric.putString("dateTime", dateTime);
-        //                             bodySamples.pushMap(bodyMetric);
-        //                             break;
-        //                         case "height":
-        //                             bodyMetric.putDouble("height", dp.getValue(field).asFloat());
-        //                             bodyMetric.putString("dateTime", dateTime);
-        //                             bodySamples.pushMap(bodyMetric);
-        //                             break;
-        //                     }
-
-        //                 }
-        //             }
-        //         }
-        //     });
     }
 }

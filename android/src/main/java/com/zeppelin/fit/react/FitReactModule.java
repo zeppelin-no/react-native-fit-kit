@@ -187,14 +187,8 @@ class FitReactModule extends ReactContextBaseJavaModule {
     public void getDailySteps(ReadableMap options, Promise promise) {
         Log.i(TAG, "getDailySteps");
 
-        long startDate = 1;
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = getStartDate(options.getString("startDate"));
-        }
-
         if (rxFit != null) {
-            new FitStepService(rxFit, promise, startDate, context);
+            new FitStepService(rxFit, promise, context, options);
         } else {
             promise.reject("must init first");
         }
