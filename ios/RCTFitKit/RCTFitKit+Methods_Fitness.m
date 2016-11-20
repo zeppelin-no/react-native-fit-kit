@@ -30,18 +30,63 @@
                                          endDate:endDate
                                        ascending:ascending
                                            limit:limit
-                                      completion:^(NSArray *arr, NSError *err){
-                                          if (err != nil) {
-                                              NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", err);
+                                      completion:^(NSArray *results, NSError *error){
+                                          if (!error && results) {
+                                              NSDictionary *response = @{
+                                                                         @"stepSamples": results,
+                                                                         @"endTime": [RCTFitKit buildISO8601StringFromDate:endDate],
+                                                                         };
+                                              resolve(response);
+                                          } else {
+                                              NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", error);
                                               reject(@"error with fetchCumulativeSumStatisticsCollection", nil, nil);
                                               return;
                                           }
-                                          resolve(arr);
                                       }];
 }
 
 
 
+- (void)fitness_initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    //    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKObserverQuery *query =
+    [[HKObserverQuery alloc]
+    initWithSampleType:sampleType
+    predicate:nil
+    updateHandler:^(HKObserverQuery *query,
+                    HKObserverQueryCompletionHandler completionHandler,
+                    NSError *error) {
+
+        if (error) {
+            // Perform Proper Error Handling Here...
+            NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+            reject(@"An error occured while setting up the stepCount observer", nil, nil);
+            return;
+        }
+        
+        [self.bridge.eventDispatcher sendAppEventWithName:@"FitKitStepEvent" body:@{@"steps": @1}];
+        completionHandler();
+        // resolve(@"observer added");
+        
+        // [self.healthStore executeQuery:query];
+    
+        // [self sendEventWithName:@"FitKitStepEvent" body:@"yolo"];
+    
+        // RCTEvent fu = [[RCTEvent alloc] init];
+     
+        //[self.bridge.eventDispatcher sendEvent:(id<RCTEvent>)]
+    
+              // If you have subscribed for background updates you must call the completion handler here.
+              // completionHandler();
+        
+        }];
+    
+    [self.healthStore executeQuery:query];
+}
 
 
 

@@ -178,7 +178,7 @@ public class FitActivitiesService {
     }
 
     private WritableMap handleDataSet(DataSet dataSet) {
-        Log.i(TAG, "Data returned for readActivities");
+        // Log.i(TAG, "Data returned for readActivities");
 
         WritableMap dataSetMap = Arguments.createMap();
 
@@ -252,7 +252,7 @@ public class FitActivitiesService {
                 public void onNext(SessionReadResult sessionReadResult) {
 
                     for (Session session : sessionReadResult.getSessions()) {
-                        Log.i(TAG, "Data returned for readActivities");
+                        // Log.i(TAG, "Data returned for readActivities");
 
                         String activityName = getActivityName(session.getActivity());
 

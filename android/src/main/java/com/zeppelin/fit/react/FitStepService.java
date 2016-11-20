@@ -40,34 +40,24 @@ import static java.text.DateFormat.getDateInstance;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.Timestamp;
 
 public class FitStepService {
 
     private RxFit rxFit;
     public static final String TAG = "RCTFitKit";
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
         this.rxFit = rxFit;
         Log.i(TAG, "FitStepService");
 
-        long startTime = getStartTime(options);
-        long endTime = getEndTime(options);
-        getDailySteps(promise, startTime, endTime);
+        long[] timeBounds = getTimeBounds(options);
+        getDailySteps(promise, timeBounds);
     }
 
-    private void getDailySteps(final Promise promise, Map timeBounds) {
+    private void getDailySteps(final Promise promise, long[] timeBounds) {
         Log.i(TAG, "getDailySteps");
-        Calendar cal = Calendar.getInstance();
-        Date now = new Date();
-        cal.setTime(now);
-        endTime = cal.getTimeInMillis();
-        cal.add(Calendar.WEEK_OF_YEAR, -2);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        startTime = cal.getTimeInMillis();
 
         DataSource ESTIMATED_STEP_DELTAS = new DataSource.Builder()
             .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
@@ -82,12 +72,12 @@ public class FitStepService {
             // .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
             // .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
             .bucketByTime(1, TimeUnit.DAYS)
-            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+            .setTimeRange(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
             .build();
 
         final WritableArray stepSamples = Arguments.createArray();
         final WritableMap stepsData = Arguments.createMap();
-        stepsData.putString("endTime", dateFormat.format(endTime));
+        stepsData.putString("endTime", dateFormat.format(timeBounds[1]));
 
         rxFit.history().read(dataReadRequest)
             .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
@@ -107,7 +97,6 @@ public class FitStepService {
                 @Override
                 public void onError(Throwable e) {
                     Log.e(TAG, "ooops error????????????");
-                    // e.printStackTrace();
                     promise.reject("getBodyMetrics error!", e);
                 }
 
@@ -124,7 +113,7 @@ public class FitStepService {
         WritableMap step = Arguments.createMap();
 
         for (DataPoint dp : dataSet.getDataPoints()) {
-            step.putString("Date", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+            step.putString("date", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
             for(Field field : dp.getDataType().getFields()) {
                 switch (field.getName()) {
                     case "steps":
@@ -137,18 +126,49 @@ public class FitStepService {
         return step;
     }
 
-    private Map getTimeBounds(ReadableMap options) {
+    private long dateToInt(String startDateString) {
         long startDate = 1;
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = getStartDate(options.getString("startDate"));
+        try {
+            // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            // dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Date parsedDate = dateFormat.parse(startDateString);
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            startDate = timestamp.getTime();
+        } catch(Exception e) {
+            Log.e(TAG, "error with the startDate string, using 1");
+            Log.e(TAG, Log.getStackTraceString(e));
         }
 
+        return startDate;
+    }
 
-        long[] timeBounds;
+    private long[] getTimeBounds(ReadableMap options) {
+        long endDate = 1;
+        long startDate = 1;
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
 
-        Map timeBounds = new HashMap();
+        if (options.hasKey("endDate") && !options.isNull("endDate")) {
+            endDate = dateToInt(options.getString("endDate"));
+        } else {
+            endDate = cal.getTimeInMillis();
+        }
 
+        if (options.hasKey("startDate") && !options.isNull("startDate")) {
+            Log.e(TAG, options.getString("startDate"));
+            startDate = dateToInt(options.getString("startDate"));
+        } else {
+            cal.add(Calendar.WEEK_OF_YEAR, -2);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            startDate = cal.getTimeInMillis();
+        }
+
+        long[] timeBounds = {startDate, endDate};
 
         return timeBounds;
     }

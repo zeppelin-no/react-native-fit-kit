@@ -149,6 +149,9 @@ class FitReactModule extends ReactContextBaseJavaModule {
 
     private long getStartDate(String startDateString) {
         long startDate = 1;
+
+        Log.e(TAG, startDateString);
+
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
             // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");

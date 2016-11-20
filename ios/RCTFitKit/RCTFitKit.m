@@ -28,7 +28,7 @@
 RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"harhar", @"horhor"];
+    return @[@"FitKitStepEvent", @"horhor"];
 }
 
 RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
@@ -177,11 +177,7 @@ RCT_EXPORT_METHOD(getBodyMetrics:(NSDictionary *)input resolver:(RCTPromiseResol
 
 RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    //RCTFitKitStepObserver* observer = [[RCTFitKitStepObserver alloc] init];
-    
-    //[observer fitness_initializeStepEventObserver:input healthStore:self.healthStore resolver:resolve rejecter:reject];
-    
-    [self fitness_initializeStepEventObserver:input resolver:resolve rejecter:reject];
+    [self fitness_initStepCountObserver:input resolver:resolve rejecter:reject];
 }
 
 
