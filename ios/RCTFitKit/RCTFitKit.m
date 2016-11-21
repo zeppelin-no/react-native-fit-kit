@@ -15,30 +15,25 @@
 #import "RCTFitKit+Methods_Vitals.h"
 #import "RCTFitKit+Methods_Results.h"
 
+#import "RCTFitKit+Events.h"
+
 #import "RCTBridge.h"
-#import "RCTEventDispatcher.h"
+// #import "RCTEventDispatcher.h"
 
 @implementation RCTFitKit
 
-@synthesize bridge = _bridge;
+// @synthesize bridge = _bridge;
 
 
 RCT_EXPORT_MODULE();
 
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"FitKitStepEvent", @"horhor"];
+}
 
 RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
 {
     [self isHealthKitAvailable:callback];
-}
-
-RCT_EXPORT_METHOD(initFitKit:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
-    [self initializeHealthKit:input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject];
-}
-
-RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self fitness_initializeStepEventObserver:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getBiologicalSex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -66,7 +61,6 @@ RCT_EXPORT_METHOD(saveWeight:(NSDictionary *)input callback:(RCTResponseSenderBl
     [self body_saveWeight:input callback:callback];
 }
 
-
 RCT_EXPORT_METHOD(getLatestHeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self body_getLatestHeight:input callback:callback];
@@ -82,7 +76,6 @@ RCT_EXPORT_METHOD(saveHeight:(NSDictionary *)input callback:(RCTResponseSenderBl
     [self body_saveHeight:input callback:callback];
 }
 
-
 RCT_EXPORT_METHOD(getLatestBmi:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self body_getLatestBodyMassIndex:input callback:callback];
@@ -92,7 +85,6 @@ RCT_EXPORT_METHOD(saveBmi:(NSDictionary *)input callback:(RCTResponseSenderBlock
 {
     [self body_saveBodyMassIndex:input callback:callback];
 }
-
 
 RCT_EXPORT_METHOD(getLatestBodyFatPercentage:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
@@ -104,25 +96,9 @@ RCT_EXPORT_METHOD(getLatestLeanBodyMass:(NSDictionary *)input callback:(RCTRespo
     [self body_getLatestLeanBodyMass:input callback:callback];
 }
 
-
-//RCT_EXPORT_METHOD(getStepCountForToday:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-//{
-//    [self fitness_getStepCountForToday:input callback:callback];
-//}
-
 RCT_EXPORT_METHOD(getStepCount:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self fitness_getStepCountOnDay:input callback:callback];
-}
-
-//RCT_EXPORT_METHOD(getMultiDayStepCounts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-//{
-//    [self fitness_getDailyStepCounts:input callback:callback];
-//}
-
-RCT_EXPORT_METHOD(getDailyStepCountSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self fitness_getDailyStepSamples:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(saveSteps:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -170,6 +146,25 @@ RCT_EXPORT_METHOD(getBloodGlucoseSamples:(NSDictionary *)input callback:(RCTResp
     [self results_getBloodGlucoseSamples:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self getModuleInfo:input callback:callback];
+}
+
+
+
+// promises
+
+RCT_EXPORT_METHOD(initFitKit:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self initializeHealthKit:input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject];
+}
+
+RCT_EXPORT_METHOD(getDailySteps:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self fitness_getDailySteps:input resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self workout_getActivities:input resolver:resolve rejecter:reject];
@@ -180,9 +175,9 @@ RCT_EXPORT_METHOD(getBodyMetrics:(NSDictionary *)input resolver:(RCTPromiseResol
     [self body_getBodyMetrics:input resolver:resolve rejecter:reject];
 }
 
-RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self getModuleInfo:input callback:callback];
+    [self fitness_initStepCountObserver:input resolver:resolve rejecter:reject];
 }
 
 

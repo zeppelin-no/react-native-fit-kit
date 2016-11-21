@@ -10,26 +10,91 @@
 #import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
 
+
 @implementation RCTFitKit (Methods_Fitness)
 
 
-//- (void)fitness_getStepCountForToday:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-//{
-//    HKQuantityType *stepCountType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-//    HKUnit *stepsUnit = [HKUnit countUnit];
-//
-//    [self fetchSumOfSamplesTodayForType:stepCountType
-//                                   unit:stepsUnit
-//                             completion:^(double totalSteps, NSError *error) {
-//        if (!totalSteps) {
-//            NSLog(@"Either an error occured fetching the user's step count information or none has been stored yet. In your app, try to handle this gracefully.");
-//            callback(@[RCTMakeError(@"Either an error occured fetching the user's step count information or none has been stored yet. In your app, try to handle this gracefully.", nil, nil)]);
-//            return;
-//        }
-//
-//        callback(@[[NSNull null], @(totalSteps)]);
-//    }];
-//}
+- (void)fitness_getDailySteps:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    HKUnit *unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit countUnit]];
+    NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
+    BOOL ascending = [RCTFitKit boolFromOptions:input key:@"ascending" withDefault:false];
+    NSDate *startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
+    NSDate *endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    
+    HKQuantityType *stepCountType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    [self fetchCumulativeSumStatisticsCollection:stepCountType
+                                            unit:unit
+                                       startDate:startDate
+                                         endDate:endDate
+                                       ascending:ascending
+                                           limit:limit
+                                      completion:^(NSArray *results, NSError *error){
+                                          if (!error && results) {
+                                              NSDictionary *response = @{
+                                                                         @"stepSamples": results,
+                                                                         @"endTime": [RCTFitKit buildISO8601StringFromDate:endDate],
+                                                                         };
+                                              resolve(response);
+                                          } else {
+                                              NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", error);
+                                              reject(@"error with fetchCumulativeSumStatisticsCollection", nil, nil);
+                                              return;
+                                          }
+                                      }];
+}
+
+
+
+- (void)fitness_initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    //    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKObserverQuery *query =
+    [[HKObserverQuery alloc]
+    initWithSampleType:sampleType
+    predicate:nil
+    updateHandler:^(HKObserverQuery *query,
+                    HKObserverQueryCompletionHandler completionHandler,
+                    NSError *error) {
+
+        if (error) {
+            // Perform Proper Error Handling Here...
+            NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+            reject(@"An error occured while setting up the stepCount observer", nil, nil);
+            return;
+        }
+        
+        [self.bridge.eventDispatcher sendAppEventWithName:@"FitKitStepEvent" body:@{@"steps": @1}];
+        completionHandler();
+        // resolve(@"observer added");
+        
+        // [self.healthStore executeQuery:query];
+    
+        // [self sendEventWithName:@"FitKitStepEvent" body:@"yolo"];
+    
+        // RCTEvent fu = [[RCTEvent alloc] init];
+     
+        //[self.bridge.eventDispatcher sendEvent:(id<RCTEvent>)]
+    
+              // If you have subscribed for background updates you must call the completion handler here.
+              // completionHandler();
+        
+        }];
+    
+    [self.healthStore executeQuery:query];
+}
+
+
+
+
+
+
+
+
 
 
 - (void)fitness_getStepCountOnDay:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
@@ -65,70 +130,6 @@
 }
 
 
-
-//
-//- (void)fitness_getDailyStepCounts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-//{
-//    NSDate *startDate = [RCTFitKit startDateFromOptions:input];
-//    NSDate *endDate = [RCTFitKit endDateFromOptionsDefaultNow:input];
-//
-//    if(startDate == nil) {
-//        callback(@[RCTMakeError(@"could not parse required startDate from options.startDate", nil, nil)]);
-//        return;
-//    }
-//
-//    HKQuantityType *stepCountType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-//    HKUnit *stepsUnit = [HKUnit countUnit];
-//
-//    [self fetchCumulativeSumStatisticsCollection:stepCountType
-//                                            unit:stepsUnit
-//                                       startDate:startDate
-//                                         endDate:endDate
-//                                      completion:^(NSArray *arr, NSError *err){
-//        if (err != nil) {
-//            NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", err);
-//            callback(@[RCTMakeError(@"error with fetchCumulativeSumStatisticsCollection", err, nil)]);
-//            return;
-//        }
-//        callback(@[[NSNull null], arr]);
-//    }];
-//}
-
-
-
-
-- (void)fitness_getDailyStepSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-{
-    HKUnit *unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit countUnit]];
-    NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
-    BOOL ascending = [RCTFitKit boolFromOptions:input key:@"ascending" withDefault:false];
-    NSDate *startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:nil];
-    NSDate *endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
-    if(startDate == nil){
-        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
-        return;
-    }
-
-    HKQuantityType *stepCountType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-
-    [self fetchCumulativeSumStatisticsCollection:stepCountType
-                                            unit:unit
-                                       startDate:startDate
-                                         endDate:endDate
-                                       ascending:ascending
-                                           limit:limit
-                                      completion:^(NSArray *arr, NSError *err){
-        if (err != nil) {
-            NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", err);
-            callback(@[RCTMakeError(@"error with fetchCumulativeSumStatisticsCollection", err, nil)]);
-            return;
-        }
-        callback(@[[NSNull null], arr]);
-    }];
-}
-
-
-
 - (void)fitness_saveSteps:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     double value = [RCTFitKit doubleFromOptions:input key:@"value" withDefault:(double)0];
@@ -154,41 +155,6 @@
         callback(@[[NSNull null], @(value)]);
     }];
 }
-
-
-
-- (void)fitness_initializeStepEventObserver:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-{
-    HKSampleType *sampleType =
-    [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-
-    HKObserverQuery *query =
-    [[HKObserverQuery alloc]
-     initWithSampleType:sampleType
-     predicate:nil
-     updateHandler:^(HKObserverQuery *query,
-                     HKObserverQueryCompletionHandler completionHandler,
-                     NSError *error) {
-
-         if (error) {
-             // Perform Proper Error Handling Here...
-             NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
-             callback(@[RCTMakeError(@"An error occured while setting up the stepCount observer", error, nil)]);
-             return;
-         }
-
-          [self.bridge.eventDispatcher sendAppEventWithName:@"change:steps"
-                                                       body:@{@"name": @"change:steps"}];
-
-         // If you have subscribed for background updates you must call the completion handler here.
-         // completionHandler();
-
-     }];
-
-    [self.healthStore executeQuery:query];
-}
-
-
 
 - (void)fitness_getDistanceWalkingRunningOnDay:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
@@ -264,9 +230,5 @@
         callback(@[[NSNull null], response]);
     }];
 }
-
-
-
-
 
 @end

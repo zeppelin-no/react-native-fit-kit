@@ -297,7 +297,8 @@
                                                      fromDate:[NSDate date]];
     anchorComponents.hour = 0;
     NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
-
+    
+    
     // Create the query
     HKStatisticsCollectionQuery *query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
                                                                            quantitySamplePredicate:nil
@@ -323,14 +324,14 @@
                                            NSDate *startDate = result.startDate;
                                            NSDate *endDate = result.endDate;
                                            double value = [quantity doubleValueForUnit:unit];
-
+                                           
                                            NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:startDate];
                                            NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:endDate];
 
                                            NSDictionary *elem = @{
                                                    @"value" : @(value),
-                                                   @"startDate" : startDateString,
-                                                   @"endDate" : endDateString,
+                                                   @"date" : startDateString,
+                                                   //@"endDate" : endDateString,
                                            };
 
                                            [data addObject:elem];

@@ -32,21 +32,14 @@ import java.util.Date;
 import java.util.Calendar;
 
 public class FitBodyMetricsService {
-// public class FitBodyMetricsService extends IntentService {
 
     private RxFit rxFit;
     public static final String TAG = "RCTFitKit";
 
     public FitBodyMetricsService(RxFit rxFit, Promise promise, long startTime, Context context) {
-        // super(FitBodyMetricsService.class.getName());
         this.rxFit = rxFit;
         readBodyMetrics(promise, startTime, context);
     }
-
-    // @Override
-    // protected void onHandleIntent(Intent intent) {
-    //     Log.i(TAG, "asdofhasfuhasidf");
-    // }
 
     private void readBodyMetrics(final Promise promise, long startTime, Context context) {
         Calendar cal = Calendar.getInstance();
@@ -84,12 +77,12 @@ public class FitBodyMetricsService {
                 public void onError(Throwable e) {
                     Log.e(TAG, "ooops error");
                     e.printStackTrace();
-                    promise.reject("getBodyMetrics error!");
+                    promise.reject("getBodyMetrics error!", e);
                 }
 
                 @Override
                 public void onNext(DataSet dataSet) {
-                    Log.i(TAG, "Data returned for Data type: " + dataSet);
+                    Log.i(TAG, "Data returned for readBodyMetrics");
 
                     for (DataPoint dp : dataSet.getDataPoints()) {
                         String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));

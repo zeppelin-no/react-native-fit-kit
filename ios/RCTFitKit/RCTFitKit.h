@@ -8,8 +8,9 @@
 #import "RCTBridgeModule.h"
 #import "RCTUtils.h"
 #import "RCTLog.h"
+#import <RCTEventEmitter.h>
 
-@interface RCTFitKit : NSObject <RCTBridgeModule>
+@interface RCTFitKit : RCTEventEmitter <RCTBridgeModule>
 
 @property (nonatomic) HKHealthStore *healthStore;
 

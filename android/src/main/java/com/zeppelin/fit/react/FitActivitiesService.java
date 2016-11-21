@@ -58,7 +58,7 @@ public class FitActivitiesService {
     public FitActivitiesService(RxFit rxFit, Promise promise, long startTime, Context context) {
         // super(FitActivitiesService.class.getName());
         this.rxFit = rxFit;
-        readBodyMetrics(promise, startTime, context);
+        readActivities(promise, startTime, context);
         initGFToFKMap();
     }
 
@@ -178,7 +178,7 @@ public class FitActivitiesService {
     }
 
     private WritableMap handleDataSet(DataSet dataSet) {
-        Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
+        // Log.i(TAG, "Data returned for readActivities");
 
         WritableMap dataSetMap = Arguments.createMap();
 
@@ -223,7 +223,7 @@ public class FitActivitiesService {
         return dataSetMap;
     }
 
-    private void readBodyMetrics(final Promise promise, long startTime, Context context) {
+    private void readActivities(final Promise promise, long startTime, Context context) {
         Calendar cal = Calendar.getInstance();
         Date now = new Date();
         cal.setTime(now);
@@ -252,7 +252,7 @@ public class FitActivitiesService {
                 public void onNext(SessionReadResult sessionReadResult) {
 
                     for (Session session : sessionReadResult.getSessions()) {
-                        Log.i(TAG, "Data returned for Data type: " + session);
+                        // Log.i(TAG, "Data returned for readActivities");
 
                         String activityName = getActivityName(session.getActivity());
 
