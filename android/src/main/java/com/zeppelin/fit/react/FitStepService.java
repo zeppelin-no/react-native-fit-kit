@@ -77,7 +77,7 @@ public class FitStepService {
 
         final WritableArray stepSamples = Arguments.createArray();
         final WritableMap stepsData = Arguments.createMap();
-        stepsData.putString("endTime", dateFormat.format(timeBounds[1]));
+        stepsData.putString("endDate", dateFormat.format(timeBounds[1]));
 
         rxFit.history().read(dataReadRequest)
             .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {

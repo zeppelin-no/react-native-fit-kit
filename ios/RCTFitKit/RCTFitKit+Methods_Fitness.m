@@ -34,7 +34,7 @@
                                           if (!error && results) {
                                               NSDictionary *response = @{
                                                                          @"stepSamples": results,
-                                                                         @"endTime": [RCTFitKit buildISO8601StringFromDate:endDate],
+                                                                         @"endDate": [RCTFitKit buildISO8601StringFromDate:endDate],
                                                                          };
                                               resolve(response);
                                           } else {
