@@ -95,8 +95,7 @@ class FitReactModule extends ReactContextBaseJavaModule {
                 new Scope[] {
                     new Scope(Scopes.FITNESS_LOCATION_READ_WRITE),
                     new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE),
-                    new Scope(Scopes.FITNESS_ACTIVITY_READ),
-                    new Scope(Scopes.FITNESS_BODY_READ)
+                    new Scope(Scopes.FITNESS_BODY_READ_WRITE),
                 }
             );
             Completable rxFitConnection = rxFit.checkConnection();
@@ -153,37 +152,17 @@ class FitReactModule extends ReactContextBaseJavaModule {
         Log.e(TAG, startDateString);
 
         try {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-            // dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             Date parsedDate = dateFormat.parse(startDateString);
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            startDate = timestamp.getTime();
+
+            startDate = parsedDate.getTime();
         } catch(Exception e) {
             Log.e(TAG, "error with the startDate string, using 1");
             e.printStackTrace();
         }
 
         return startDate;
-    }
-
-    private FitBodyMetricsService mReceiver;
-
-    @ReactMethod
-    public void getBodyMetrics(ReadableMap options, Promise promise) {
-        Log.i(TAG, "getBodyMetrics");
-
-        long startDate = 1;
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = getStartDate(options.getString("startDate"));
-        }
-
-        if (rxFit != null) {
-            new FitBodyMetricsService(rxFit, promise, startDate, context);
-        } else {
-            promise.reject("must init first");
-        }
     }
 
     @ReactMethod
@@ -209,6 +188,50 @@ class FitReactModule extends ReactContextBaseJavaModule {
 
         if (rxFit != null) {
             new FitStepObserver(rxFit, promise, startDate, context);
+        } else {
+            promise.reject("must init first");
+        }
+    }
+
+    private FitBodyMetricsService mReceiver;
+
+    @ReactMethod
+    public void getBodyMetrics(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getBodyMetrics");
+
+        long startDate = 1;
+
+        if (options.hasKey("startDate") && !options.isNull("startDate")) {
+            startDate = getStartDate(options.getString("startDate"));
+        }
+
+        if (rxFit != null) {
+            new FitBodyMetricsService(rxFit, context)
+                .readBodyMetrics(promise, startDate);
+        } else {
+            promise.reject("must init first");
+        }
+    }
+
+    @ReactMethod
+    public void saveWeight(ReadableMap options, Promise promise) {
+        Log.i(TAG, "saveWeight");
+
+        if (rxFit != null) {
+            new FitBodyMetricsService(rxFit, context)
+                .saveWeight(options, promise);
+        } else {
+            promise.reject("must init first");
+        }
+    }
+
+    @ReactMethod
+    public void saveHeight(ReadableMap options, Promise promise) {
+        Log.i(TAG, "saveHeight");
+
+        if (rxFit != null) {
+            new FitBodyMetricsService(rxFit, context)
+                .saveHeight(options, promise);
         } else {
             promise.reject("must init first");
         }

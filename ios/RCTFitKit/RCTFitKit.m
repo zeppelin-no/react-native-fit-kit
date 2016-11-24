@@ -46,34 +46,14 @@ RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input callback:(RCTResponseSend
     [self characteristic_getDateOfBirth:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(getLatestWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self body_getLatestWeight:input callback:callback];
-}
-
 RCT_EXPORT_METHOD(getWeightSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self body_getWeightSamples:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(saveWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self body_saveWeight:input callback:callback];
-}
-
-RCT_EXPORT_METHOD(getLatestHeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self body_getLatestHeight:input callback:callback];
-}
-
 RCT_EXPORT_METHOD(getHeightSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self body_getHeightSamples:input callback:callback];
-}
-
-RCT_EXPORT_METHOD(saveHeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self body_saveHeight:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getLatestBmi:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -179,6 +159,32 @@ RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input resolver:(RCTPromi
 {
     [self fitness_initStepCountObserver:input resolver:resolve rejecter:reject];
 }
+
+RCT_EXPORT_METHOD(getLatestWeight:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_getLatestWeight:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(getLatestHeight:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_getLatestHeight:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(getLatestBodyStats:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_getLatestBodyStats:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(saveWeight:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_saveWeight:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(saveHeight:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self body_saveHeight:input resolver:resolve rejecter:reject];
+}
+
 
 
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
