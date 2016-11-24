@@ -6,6 +6,9 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
+
 import android.util.Log;
 import android.content.Context;
 
@@ -30,18 +33,23 @@ import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.TimeZone;
+
+import com.google.android.gms.fitness.data.DataSource;
+import com.google.android.gms.common.api.Status;
 
 public class FitBodyMetricsService {
 
     private RxFit rxFit;
+    private Context context;
     public static final String TAG = "RCTFitKit";
 
-    public FitBodyMetricsService(RxFit rxFit, Promise promise, long startTime, Context context) {
+    public FitBodyMetricsService(RxFit rxFit, Context context) {
         this.rxFit = rxFit;
-        readBodyMetrics(promise, startTime, context);
+        this.context = context;
     }
 
-    private void readBodyMetrics(final Promise promise, long startTime, Context context) {
+    public void readBodyMetrics(final Promise promise, long startTime) {
         Calendar cal = Calendar.getInstance();
         Date now = new Date();
         cal.setTime(now);
@@ -55,7 +63,8 @@ public class FitBodyMetricsService {
 
         final WritableArray bodySamples = Arguments.createArray();
         final WritableMap bodyMetrics = Arguments.createMap();
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         rxFit.history().read(dataReadRequest)
             .flatMapObservable(new Func1<DataReadResult, Observable<DataSet>>() {
@@ -76,7 +85,7 @@ public class FitBodyMetricsService {
                 @Override
                 public void onError(Throwable e) {
                     Log.e(TAG, "ooops error");
-                    e.printStackTrace();
+                    Log.e(TAG, Log.getStackTraceString(e));
                     promise.reject("getBodyMetrics error!", e);
                 }
 
@@ -106,5 +115,118 @@ public class FitBodyMetricsService {
                     }
                 }
             });
+    }
+
+    private DataSet createDataForRequest(
+        DataType dataType,
+        int dataSourceType,
+        Object values,
+        TimeUnit timeUnit
+    ) {
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        long startTime = cal.getTimeInMillis();
+
+
+        DataSource dataSource = new DataSource.Builder()
+                .setAppPackageName(context.getPackageName())
+                .setDataType(dataType)
+                .setStreamName(TAG + " - ass count")
+                .setType(dataSourceType)
+                .build();
+
+
+        DataSet dataSet = DataSet.create(dataSource);
+
+        DataPoint dataPoint = dataSet.createDataPoint()
+            .setTimestamp(endTime, timeUnit);
+
+        if (values instanceof Integer) {
+            dataPoint = dataPoint.setIntValues((Integer)values);
+        } else {
+            dataPoint = dataPoint.setFloatValues((Float)values);
+            // dataPoint = dataPoint.getValue().setFloat((Float)values);
+        }
+
+        dataSet.add(dataPoint);
+
+        return dataSet;
+    }
+
+    public void saveWeight(ReadableMap options, final Promise promise) {
+        Float weight;
+        try {
+            weight = Float.valueOf(String.valueOf(options.getDouble("value")));
+            DataSet dataSet = createDataForRequest(
+                DataType.TYPE_WEIGHT,
+                DataSource.TYPE_RAW,
+                weight,
+                TimeUnit.MILLISECONDS
+            );
+
+            rxFit.history().insert(dataSet)
+                .subscribe(new Observer<Status>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.i(TAG, "Observable done!");
+                        promise.resolve("");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "ooops error");
+                        Log.e(TAG, Log.getStackTraceString(e));
+                        promise.reject("saveWeight error!", e);
+                    }
+
+                    @Override
+                    public void onNext(Status status) {
+                        Log.i(TAG, "Data returned for readBodyMetrics");
+                    }
+                });
+        } catch (Exception e) {
+            promise.reject("convert weight error", e);
+        }
+
+    }
+
+    public void saveHeight(ReadableMap options, final Promise promise) {
+        Float height;
+        try {
+            height = Float.valueOf(String.valueOf(options.getDouble("value")));
+            DataSet dataSet = createDataForRequest(
+                DataType.TYPE_HEIGHT,
+                DataSource.TYPE_RAW,
+                height,
+                TimeUnit.MILLISECONDS
+            );
+
+            rxFit.history().insert(dataSet)
+                .subscribe(new Observer<Status>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.i(TAG, "Observable done!");
+                        promise.resolve("");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "ooops error");
+                        Log.e(TAG, Log.getStackTraceString(e));
+                        promise.reject("saveHeight error!", e);
+                    }
+
+                    @Override
+                    public void onNext(Status status) {
+                        Log.i(TAG, "Data returned for readBodyMetrics");
+                    }
+                });
+        } catch (Exception e) {
+            promise.reject("convert weight error", e);
+        }
+
     }
 }

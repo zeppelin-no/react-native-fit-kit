@@ -41,16 +41,19 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.Timestamp;
+import java.util.TimeZone;
 
 public class FitStepService {
 
     private RxFit rxFit;
     public static final String TAG = "RCTFitKit";
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
         this.rxFit = rxFit;
         Log.i(TAG, "FitStepService");
+
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         long[] timeBounds = getTimeBounds(options);
         getDailySteps(promise, timeBounds);
@@ -89,7 +92,7 @@ public class FitStepService {
             .subscribe(new Observer<Bucket>() {
                 @Override
                 public void onCompleted() {
-                    Log.i(TAG, "Observable done!??????");
+                    Log.i(TAG, "getDailySteps completed");
                     stepsData.putArray("stepSamples", stepSamples);
                     promise.resolve(stepsData);
                 }
@@ -102,7 +105,10 @@ public class FitStepService {
 
                 @Override
                 public void onNext(Bucket bucket) {
+
                     for (DataSet dataSet : bucket.getDataSets()) {
+                        Log.i(TAG, dataSet.toString());
+
                         stepSamples.pushMap(formatStepData(dataSet));
                     }
                 }
@@ -126,46 +132,45 @@ public class FitStepService {
         return step;
     }
 
-    private long dateToInt(String startDateString) {
-        long startDate = 1;
+    private long dateToInt(String dateString, long fallback) {
+        long dateTimeStamp = 1;
+        Log.e(TAG, dateString);
+
         try {
-            // DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-            // dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-            Date parsedDate = dateFormat.parse(startDateString);
-            Timestamp timestamp = new Timestamp(parsedDate.getTime());
-            startDate = timestamp.getTime();
+            Date parsedDate = dateFormat.parse(dateString);
+            dateTimeStamp = parsedDate.getTime();
         } catch(Exception e) {
-            Log.e(TAG, "error with the startDate string, using 1");
+            Log.e(TAG, "error with the time string, using " + fallback);
             Log.e(TAG, Log.getStackTraceString(e));
+            dateTimeStamp = fallback;
         }
 
-        return startDate;
+        return dateTimeStamp;
     }
 
     private long[] getTimeBounds(ReadableMap options) {
         long endDate = 1;
-        long startDate = 1;
         Calendar cal = Calendar.getInstance();
         Date now = new Date();
         cal.setTime(now);
+        endDate = cal.getTimeInMillis();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long startDateMin = cal.getTimeInMillis();
+        cal.add(Calendar.WEEK_OF_YEAR, -10);
+        long startDate = cal.getTimeInMillis();
 
         if (options.hasKey("endDate") && !options.isNull("endDate")) {
-            endDate = dateToInt(options.getString("endDate"));
-        } else {
-            endDate = cal.getTimeInMillis();
+            endDate = dateToInt(options.getString("endDate"), endDate);
         }
 
         if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            Log.e(TAG, options.getString("startDate"));
-            startDate = dateToInt(options.getString("startDate"));
-        } else {
-            cal.add(Calendar.WEEK_OF_YEAR, -2);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            startDate = cal.getTimeInMillis();
+            startDate = dateToInt(options.getString("startDate"), startDate);
+            if (startDate > startDateMin) {
+                startDate = startDateMin;
+            }
         }
 
         long[] timeBounds = {startDate, endDate};
