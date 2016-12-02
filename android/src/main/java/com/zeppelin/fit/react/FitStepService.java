@@ -119,10 +119,10 @@ public class FitStepService {
         WritableMap step = Arguments.createMap();
 
         for (DataPoint dp : dataSet.getDataPoints()) {
-            step.putString("date", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
             for(Field field : dp.getDataType().getFields()) {
                 switch (field.getName()) {
                     case "steps":
+                        step.putString("date", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
                         step.putInt("value", dp.getValue(field).asInt());
                         break;
                 }
