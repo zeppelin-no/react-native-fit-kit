@@ -34,7 +34,7 @@
                                       completion:^(NSArray *results, NSError *error){
                                           if (!error && results) {
                                               NSDictionary *response = @{
-                                                                         @"stepSamples": results,
+                                                                         @"stepSamples": [[results reverseObjectEnumerator] allObjects],
                                                                          @"endDate": [RCTFitKit buildISO8601StringFromDate:endDate],
                                                                          };
                                               resolve(response);
