@@ -10,14 +10,14 @@
 
 @implementation RCTFitKit (Methods_Workout)
 
--(NSMutableDictionary *)convertHKActivityType:(NSMutableDictionary *)jsonResponse
-{
+- (NSMutableDictionary*)convertHKActivityType:(NSMutableDictionary*)jsonResponse {
     @try {
         NSLog(@"jsonResponse %@", jsonResponse);
-        
+
         // Remove HKWorkoutActivityType
-        NSString *standarizedActivityType = [jsonResponse[@"body"][@"activity_name"] stringByReplacingOccurrencesOfString:@"HKWorkoutActivityType" withString:@""];
-        
+        NSString* standarizedActivityType =
+            [jsonResponse[@"body"][@"activity_name"] stringByReplacingOccurrencesOfString:@"HKWorkoutActivityType" withString:@""];
+
         // Split and undescore on capital letter
         standarizedActivityType = [standarizedActivityType stringByReplacingOccurrencesOfString:@"([a-z])([A-Z])"
                                                                                      withString:@"$1_$2"
@@ -25,92 +25,88 @@
                                                                                           range:NSMakeRange(0, standarizedActivityType.length)];
         // Uppercase string
         standarizedActivityType = [standarizedActivityType uppercaseString];
-        
+
         jsonResponse[@"body"][@"activity_name"] = standarizedActivityType;
-    } @catch (NSException *exception) {
+    } @catch (NSException* exception) {
         NSLog(@"Error converting HKActivity to standarized activity %@", exception);
     }
 
     return jsonResponse;
 }
 
--(NSMutableDictionary *)convertSchemaID:(NSMutableDictionary *)jsonResponse
-{
+- (NSMutableDictionary*)convertSchemaID:(NSMutableDictionary*)jsonResponse {
     @try {
         // Remove HKWorkoutActivityType
-        NSDictionary *standarizedSchemaID = @{
-                                              @"namespace": @"omh",
-                                              @"name": @"physical-activity",
-                                              @"version": @"1.2",
-                                              };
-        
+        NSDictionary* standarizedSchemaID = @{
+            @"namespace" : @"omh",
+            @"name" : @"physical-activity",
+            @"version" : @"1.2",
+        };
+
         jsonResponse[@"header"][@"schema_id"] = standarizedSchemaID;
-    } @catch (NSException *exception) {
+    } @catch (NSException* exception) {
         NSLog(@"Error converting schema_id to standard schema_id %@", exception);
     }
-    
+
     return jsonResponse;
 }
 
--(void)workout_getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
-{
-    HKUnit *distanceUnit = [RCTFitKit hkUnitFromOptions:input];
-    if(distanceUnit == nil){
+- (void)workout_getActivities:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+    NSLog(@"workout_getActivities");
+
+    HKUnit* distanceUnit = [RCTFitKit hkUnitFromOptions:input];
+    if (distanceUnit == nil) {
         distanceUnit = [HKUnit meterUnit];
     }
-    
-    HKUnit *enegryUnit = [RCTFitKit hkUnitFromOptions:input];
-    if(enegryUnit == nil){
+
+    HKUnit* enegryUnit = [RCTFitKit hkUnitFromOptions:input];
+    if (enegryUnit == nil) {
         enegryUnit = [HKUnit calorieUnit];
     }
-    
-    NSDate *startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
-    NSDate *endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
-    // 1. Predicate to read only running workouts
-    
-    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:false];
-    
-    // 2. Order the workouts by date
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
 
-    // 3. Create the query
-    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKWorkoutType workoutType]
-                                                                 predicate:predicate
-                                                                     limit:HKObjectQueryNoLimit
-                                                           sortDescriptors:@[sortDescriptor]
-                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
-                                  {
-                                      
-                                      if (!error && results) {
-                                          NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
-                                          
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                              
-                                              for (HKQuantitySample *sample in results) {
-                                                  
-                                                  OMHSerializer *serializer = [OMHSerializer new];
-                                                  NSString* jsonString = [serializer jsonForSample:sample error:nil];
-                                                  
-                                                  NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-                                                  NSMutableDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:jsonData
-                                                                                                               options:NSJSONReadingMutableContainers
-                                                                                                                 error:nil];
-                                                  
-                                                  jsonResponse = [self convertHKActivityType:jsonResponse];
-                                                  jsonResponse = [self convertSchemaID:jsonResponse];
-                                                  [data addObject:jsonResponse];
-                                              }
-                                              
-                                              resolve(data);
-                                          });
-                                      } else {
-                                          NSLog(@"Error retrieving workouts %@", error);
-                                          reject(@"Error retrieving workouts %@", nil, error);
-                                      }
-                                  }];
-    
+    NSDate* startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
+    NSDate* endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+
+    NSPredicate* predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:false];
+
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+
+    HKSampleQuery* sampleQuery = [[HKSampleQuery alloc]
+        initWithSampleType:[HKWorkoutType workoutType]
+                 predicate:predicate
+                     limit:HKObjectQueryNoLimit
+           sortDescriptors:@[ sortDescriptor ]
+            resultsHandler:^(HKSampleQuery* query, NSArray* results, NSError* error) {
+
+              if (!error && results) {
+                  NSMutableArray* data = [NSMutableArray arrayWithCapacity:1];
+
+                  dispatch_async(dispatch_get_main_queue(), ^{
+
+                    for (HKQuantitySample* sample in results) {
+
+                        OMHSerializer* serializer = [OMHSerializer new];
+                        NSString* jsonString = [serializer jsonForSample:sample error:nil];
+
+                        NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+                        NSMutableDictionary* jsonResponse = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+
+                        jsonResponse = [self convertHKActivityType:jsonResponse];
+                        jsonResponse = [self convertSchemaID:jsonResponse];
+                        [data addObject:jsonResponse];
+                    }
+
+                    resolve(data);
+                  });
+              } else {
+                  NSLog(@"Error retrieving workouts %@", error);
+                  reject(@"Error retrieving workouts %@", nil, error);
+              }
+            }];
+
     // Execute the query
     [self.healthStore executeQuery:sampleQuery];
 }
 
 @end
+                                                                        d
