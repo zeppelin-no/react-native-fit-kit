@@ -52,7 +52,8 @@
 }
 
 - (void)body_getLatestWeight:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
-    // Query to get the user's latest weight, if it exists.
+    NSLog(@"fetching body_getLatestWeight");
+    
     HKQuantityType* weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
 
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input];
@@ -65,6 +66,7 @@
 }
 
 - (void)body_getLatestHeight:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+    NSLog(@"fetching body_getLatestHeight");
     HKQuantityType* heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
 
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input];
@@ -77,6 +79,8 @@
 }
 
 - (void)body_getLatestBodyStats:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+    NSLog(@"fetching body_getLatestBodyStats");
+    
     HKQuantityType* weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
     HKQuantityType* heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
     
@@ -101,6 +105,8 @@
 }
 
 - (void)body_saveHeight:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+    NSLog(@"body_saveHeight");
+    
     double height = [RCTFitKit doubleValueFromOptions:input];
     NSDate* sampleDate = [RCTFitKit dateFromOptionsDefaultNow:input];
     
@@ -125,6 +131,8 @@
 }
 
 - (void)body_saveWeight:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+    NSLog(@"body_saveWeight");
+    
     double weight = [RCTFitKit doubleValueFromOptions:input] * 1000;
     NSDate* sampleDate = [RCTFitKit dateFromOptionsDefaultNow:input];
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit gramUnit]];
@@ -392,7 +400,9 @@
                     endDate:(NSDate*)endDate {
     // HKQuantityType *bmiType = [HKQuantityType
     // quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMassIndex];
-
+    
+    NSLog(@"fetching body_sample");
+    
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:unitType];
     NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
     BOOL ascending = [RCTFitKit boolFromOptions:input key:@"ascending" withDefault:false];
@@ -412,7 +422,7 @@
                                       limit:limit
                                  completion:^(NSArray* results, NSError* error) {
                                    if (results) {
-                                       NSLog(@"got wight sample");
+                                       NSLog(@"got body_sample");
                                        [data addObjectsFromArray:results];
                                    } else {
                                        NSLog(@"error getting weight samples: %@", error);

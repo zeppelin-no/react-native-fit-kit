@@ -279,7 +279,9 @@
     NSDate *date;
     if(dateString != nil){
         date = [RCTFitKit parseISO8601DateFromString:dateString];
-    } else {
+    }
+    
+    if (dateString == nil || date == nil) {
         date = defaultValue;
     }
     return date;

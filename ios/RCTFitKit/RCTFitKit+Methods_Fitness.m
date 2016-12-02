@@ -16,6 +16,7 @@
 
 - (void)fitness_getDailySteps:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
+    NSLog(@"fitness_getDailySteps");
     HKUnit *unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit countUnit]];
     NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
     BOOL ascending = [RCTFitKit boolFromOptions:input key:@"ascending" withDefault:false];
@@ -49,8 +50,8 @@
 
 - (void)fitness_initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
-    //    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-    
+    NSLog(@"fitness_initStepCountObserver");
+
     HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
     
     HKObserverQuery *query =
