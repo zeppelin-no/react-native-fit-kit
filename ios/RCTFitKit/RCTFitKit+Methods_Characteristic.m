@@ -8,8 +8,8 @@
 
 @implementation RCTFitKit (Methods_Characteristic)
 
-
-- (void)characteristic_getBiologicalSex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback {
+- (void)characteristic_getBiologicalSex:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
     NSError *error;
     HKBiologicalSexObject *bioSex = [self.healthStore biologicalSexWithError:&error];
     NSString *value;
@@ -31,7 +31,7 @@
 
     if(value == nil){
         NSLog(@"error getting biological sex: %@", error);
-        callback(@[RCTMakeError(@"error getting biological sex", error, nil)]);
+        reject(@"error getting biological sex", nil, nil);
         return;
     }
 
@@ -39,17 +39,18 @@
             @"value" : value,
     };
 
-    callback(@[[NSNull null], response]);
+    resolve(response);
 }
 
 
-- (void)characteristic_getDateOfBirth:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback {
+- (void)characteristic_getDateOfBirth:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
     NSError *error;
     NSDate *dob = [self.healthStore dateOfBirthWithError:&error];
 
     if(error != nil){
         NSLog(@"error getting date of birth: %@", error);
-        callback(@[RCTMakeError(@"error getting date of birth", error, nil)]);
+        reject(@"error getting date of birth", nil, nil);
         return;
     }
     if(dob == nil) {
@@ -57,7 +58,7 @@
                                    @"value" : [NSNull null],
                                    @"age" : [NSNull null]
                                    };
-        callback(@[[NSNull null], response]);
+        resolve(response);
         return;
     }
 
@@ -72,7 +73,7 @@
             @"age" : @(ageInYears),
     };
 
-    callback(@[[NSNull null], response]);
+    resolve(response);
 }
 
 
