@@ -36,16 +36,6 @@ RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
     [self isHealthKitAvailable:callback];
 }
 
-RCT_EXPORT_METHOD(getBiologicalSex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self characteristic_getBiologicalSex:input callback:callback];
-}
-
-RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self characteristic_getDateOfBirth:input callback:callback];
-}
-
 RCT_EXPORT_METHOD(getWeightSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self body_getWeightSamples:input callback:callback];
@@ -185,7 +175,15 @@ RCT_EXPORT_METHOD(saveHeight:(NSDictionary *)input resolver:(RCTPromiseResolveBl
     [self body_saveHeight:input resolver:resolve rejecter:reject];
 }
 
+RCT_EXPORT_METHOD(getBiologicalSex:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self characteristic_getBiologicalSex:input resolver:resolve rejecter:reject];
+}
 
+RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self characteristic_getDateOfBirth:input resolver:resolve rejecter:reject];
+}
 
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
 {

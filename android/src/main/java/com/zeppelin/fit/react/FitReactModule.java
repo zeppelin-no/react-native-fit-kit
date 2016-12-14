@@ -237,6 +237,27 @@ class FitReactModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public void getBiologicalSex(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getBiologicalSex");
+
+        promise.reject("comming");
+    }
+
+    @ReactMethod
+    public void getLatestHeight(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getLatestHeight");
+
+        promise.reject("comming");
+    }
+
+    @ReactMethod
+    public void getLatestWeight(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getLatestWeight");
+
+        promise.reject("comming");
+    }
+
     public void onReceivedStartJob(JobParameters params) {
         Log.i(TAG, "onReceivedStartJob");
     }
