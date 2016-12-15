@@ -82,6 +82,7 @@ public class FitStepService {
         final WritableMap stepsData = Arguments.createMap();
         stepsData.putString("endDate", dateFormat.format(timeBounds[1]));
 
+
         rxFit.history().read(dataReadRequest)
             .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
                     @Override
@@ -105,10 +106,7 @@ public class FitStepService {
 
                 @Override
                 public void onNext(Bucket bucket) {
-
                     for (DataSet dataSet : bucket.getDataSets()) {
-                        Log.i(TAG, dataSet.toString());
-
                         stepSamples.pushMap(formatStepData(dataSet));
                     }
                 }
@@ -134,7 +132,6 @@ public class FitStepService {
 
     private long dateToInt(String dateString, long fallback) {
         long dateTimeStamp = 1;
-        Log.e(TAG, dateString);
 
         try {
             Date parsedDate = dateFormat.parse(dateString);
@@ -149,11 +146,10 @@ public class FitStepService {
     }
 
     private long[] getTimeBounds(ReadableMap options) {
-        long endDate = 1;
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         Date now = new Date();
         cal.setTime(now);
-        endDate = cal.getTimeInMillis();
+        long endDate = cal.getTimeInMillis();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
