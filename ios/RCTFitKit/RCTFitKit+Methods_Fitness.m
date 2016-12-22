@@ -10,6 +10,7 @@
 #import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
 
+@import CoreMotion;
 
 @implementation RCTFitKit (Methods_Fitness)
 
@@ -47,11 +48,56 @@
 }
 
 
-
-- (void)fitness_initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+- (IBAction)fitness_initStepCountObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     NSLog(@"fitness_initStepCountObserver");
 
+    __block NSInteger previousCount = 0;
+    [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData * _Nullable pedometerData, NSError * _Nullable error) {
+            
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc]init];
+        formatter.maximumFractionDigits = 2;
+            
+        // step counting
+        if ([CMPedometer isStepCountingAvailable]) {
+                
+            NSInteger numberOfSteps = [pedometerData.numberOfSteps integerValue];
+            [self.bridge.eventDispatcher sendAppEventWithName:@"FitKitStepEvent" body:@{@"steps": @(numberOfSteps - previousCount)}];
+            previousCount = numberOfSteps;
+                // self.stepsLabel.text = [NSString stringWithFormat:@"Steps walked: %@", [formatter stringFromNumber:pedometerData.numberOfSteps]];
+        }
+    }];
+
+    
+    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKObserverQuery *query =
+    [[HKObserverQuery alloc]
+     initWithSampleType:sampleType
+     predicate:nil
+     updateHandler:^(HKObserverQuery *query,
+                     HKObserverQueryCompletionHandler completionHandler,
+                     NSError *error) {
+         
+         NSLog(@"stepevent!!!");
+         
+         if (error) {
+             NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+             return;
+         }
+
+         completionHandler();
+         
+     }];
+    
+    [self.healthStore executeQuery:query];
+}
+
+
+- (void)fitness_HKObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    NSLog(@"fitness_initStepCountObserver");
+    
     HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
     
     HKObserverQuery *query =
@@ -62,6 +108,8 @@
                     HKObserverQueryCompletionHandler completionHandler,
                     NSError *error) {
 
+        NSLog(@"stepevent!!!");
+
         if (error) {
             // Perform Proper Error Handling Here...
             NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
@@ -70,7 +118,7 @@
         }
         
         [self.bridge.eventDispatcher sendAppEventWithName:@"FitKitStepEvent" body:@{@"steps": @1}];
-        completionHandler();
+        // completionHandler();
         // resolve(@"observer added");
         
         // [self.healthStore executeQuery:query];

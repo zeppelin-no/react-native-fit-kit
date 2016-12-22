@@ -20,6 +20,8 @@
 #import "RCTBridge.h"
 // #import "RCTEventDispatcher.h"
 
+@import CoreMotion;
+
 @implementation RCTFitKit
 
 // @synthesize bridge = _bridge;
@@ -198,6 +200,7 @@ RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input resolver:(RCTPromiseResol
 - (void)initializeHealthKit:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     self.healthStore = [[HKHealthStore alloc] init];
+    self.pedometer = [[CMPedometer alloc]init];
     
     if ([HKHealthStore isHealthDataAvailable]) {
         NSSet *writeDataTypes;
