@@ -100,7 +100,8 @@ public class FitStepService {
 
                 @Override
                 public void onError(Throwable e) {
-                    Log.e(TAG, "ooops error????????????");
+                    Log.e(TAG, "getDailySteps error");
+                    Log.e(TAG, Log.getStackTraceString(e));
                     promise.reject("getBodyMetrics error!", e);
                 }
 
@@ -130,12 +131,20 @@ public class FitStepService {
         return step;
     }
 
-    private long dateToInt(String dateString, long fallback) {
+    private long dateToInt(String dateString, long fallback, boolean startOfDay) {
         long dateTimeStamp = 1;
 
         try {
             Date parsedDate = dateFormat.parse(dateString);
-            dateTimeStamp = parsedDate.getTime();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+            cal.setTime(parsedDate);
+            if (startOfDay) {
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+            }
+            dateTimeStamp = cal.getTimeInMillis();
         } catch(Exception e) {
             Log.e(TAG, "error with the time string, using " + fallback);
             Log.e(TAG, Log.getStackTraceString(e));
@@ -159,11 +168,11 @@ public class FitStepService {
         long startDate = cal.getTimeInMillis();
 
         if (options.hasKey("endDate") && !options.isNull("endDate")) {
-            endDate = dateToInt(options.getString("endDate"), endDate);
+            endDate = dateToInt(options.getString("endDate"), endDate, false);
         }
 
         if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = dateToInt(options.getString("startDate"), startDate);
+            startDate = dateToInt(options.getString("startDate"), startDate, true);
             if (startDate > startDateMin) {
                 startDate = startDateMin;
             }
