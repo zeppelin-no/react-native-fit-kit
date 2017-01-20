@@ -51,6 +51,24 @@
     return jsonResponse;
 }
 
+- (NSMutableDictionary*)addSource:(NSMutableDictionary*)jsonResponse sourceRev:(HKSourceRevision*)sourceRev {
+    @try {
+        NSDictionary* source = @{
+                                 @"source": sourceRev.source.name,
+                                 @"version": sourceRev.version,
+                                 };
+        
+        NSLog(@"source: %@", source);
+        
+        jsonResponse[@"header"][@"source"] = source;
+        
+    } @catch (NSException *exception) {
+        NSLog(@"Error adding source %@", exception);
+    }
+    
+    return jsonResponse;
+}
+
 - (void)workout_getActivities:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"workout_getActivities");
 
@@ -84,7 +102,6 @@
                   dispatch_async(dispatch_get_main_queue(), ^{
 
                     for (HKQuantitySample* sample in results) {
-
                         OMHSerializer* serializer = [OMHSerializer new];
                         NSString* jsonString = [serializer jsonForSample:sample error:nil];
 
@@ -93,6 +110,8 @@
 
                         jsonResponse = [self convertHKActivityType:jsonResponse];
                         jsonResponse = [self convertSchemaID:jsonResponse];
+                        jsonResponse = [self addSource:jsonResponse sourceRev:sample.sourceRevision];
+                        
                         [data addObject:jsonResponse];
                     }
 
