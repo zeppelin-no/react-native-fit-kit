@@ -13,7 +13,7 @@ const initFitKit = (options = {}) => {
         granted = await PermissionsAndroid.requestPermission(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
             title: 'ACCESS_FINE_LOCATION Permission',
-            message: 'loool',
+            message: '',
           }
         );
       }
