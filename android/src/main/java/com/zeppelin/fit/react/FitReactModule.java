@@ -9,7 +9,6 @@ import com.facebook.react.bridge.Promise;
 
 import android.util.Log;
 
-
 // date related:
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -28,15 +27,11 @@ import android.os.Looper;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 
-// ?
-import android.app.job.JobScheduler;
-
 // FitKit:
-import com.zeppelin.fit.react.FitJobService;
-import com.zeppelin.fit.react.FitBodyMetricsService;
-import com.zeppelin.fit.react.FitActivitiesService;
-import com.zeppelin.fit.react.FitStepService;
-import com.zeppelin.fit.react.FitStepObserver;
+import com.zeppelin.fit.react.services.FitBodyMetricsService;
+import com.zeppelin.fit.react.services.FitActivitiesService;
+import com.zeppelin.fit.react.services.FitStepService;
+import com.zeppelin.fit.react.observers.FitStepObserver;
 
 // rx fit:
 import com.google.android.gms.fitness.Fitness;
@@ -49,7 +44,7 @@ import rx.Observer;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
-class FitReactModule extends ReactContextBaseJavaModule {
+public class FitReactModule extends ReactContextBaseJavaModule {
     private Context context;
 
     private final static String REACT_MODULE_NAME = "FitKit";
@@ -129,23 +124,9 @@ class FitReactModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
-    public void getActivities(ReadableMap options, Promise promise) {
-        Log.i(TAG, "getActivities");
-
-        long startDate = 1;
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = getStartDate(options.getString("startDate"));
-        }
-
-        if (rxFit != null) {
-            new FitActivitiesService(rxFit, promise, startDate, context);
-        } else {
-            promise.reject("must init first");
-        }
-    }
-
+    // TODO: move to "helpers", make static, return timbounds, 1 month back if no startdate, today if no enddate
+    // google fit seems to hang if large span (too many datapoints), therefore 1 month max.
+    // "make it work" -> "make it better"
     private long getStartDate(String startDateString) {
         long startDate = 1;
 
@@ -163,6 +144,17 @@ class FitReactModule extends ReactContextBaseJavaModule {
         }
 
         return startDate;
+    }
+
+    @ReactMethod
+    public void getActivities(ReadableMap options, Promise promise) {
+        Log.i(TAG, "getActivities");
+
+        if (rxFit != null) {
+            new FitActivitiesService(rxFit, promise, context, options);
+        } else {
+            promise.reject("must init first");
+        }
     }
 
     @ReactMethod

@@ -1,4 +1,4 @@
-package com.zeppelin.fit.react;
+package com.zeppelin.fit.react.services;
 
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -21,6 +21,9 @@ import com.facebook.react.bridge.Promise;
  * Service to handle callbacks from the JobScheduler. Requests scheduled with the JobScheduler
  * ultimately land on this service's "onStartJob" method. Currently all this does is post a message
  * to the app's main activity to change the state of the UI.
+ *
+ * TODO: implement service
+ *
  */
 public class FitJobService extends JobService {
     private static final String TAG = "RCTFitKit";

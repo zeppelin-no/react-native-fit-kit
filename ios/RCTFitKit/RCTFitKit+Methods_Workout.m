@@ -71,7 +71,7 @@
 
 - (void)workout_getActivities:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"workout_getActivities");
-
+    
     HKUnit* distanceUnit = [RCTFitKit hkUnitFromOptions:input];
     if (distanceUnit == nil) {
         distanceUnit = [HKUnit meterUnit];
@@ -85,6 +85,8 @@
     NSDate* startDate = [RCTFitKit dateFromOptions:input key:@"startDate" withDefault:[NSDate distantPast]];
     NSDate* endDate = [RCTFitKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
 
+    NSLog(@"startdate: %@", startDate);
+    
     NSPredicate* predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:false];
 
     NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierStartDate ascending:false];

@@ -1,4 +1,4 @@
-package com.zeppelin.fit.react;
+package com.zeppelin.fit.react.services;
 
 // import android.app.IntentService;
 // import android.content.Intent;
