@@ -1,4 +1,4 @@
-package com.zeppelin.fit.react;
+package com.zeppelin.fit.react.observers;
 
 // import android.content.Intent;
 import com.facebook.react.bridge.Promise;

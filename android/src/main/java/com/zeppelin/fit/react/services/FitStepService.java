@@ -1,7 +1,5 @@
-package com.zeppelin.fit.react;
+package com.zeppelin.fit.react.services;
 
-// import android.app.IntentService;
-// import android.content.Intent;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -43,6 +41,9 @@ import java.util.Map;
 import java.sql.Timestamp;
 import java.util.TimeZone;
 
+// helpers:
+import com.zeppelin.fit.react.helpers.TimeBounds;
+
 public class FitStepService {
 
     private RxFit rxFit;
@@ -55,7 +56,7 @@ public class FitStepService {
 
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        long[] timeBounds = getTimeBounds(options);
+        long[] timeBounds = TimeBounds.getTimeBounds(options);
         getDailySteps(promise, timeBounds);
     }
 
@@ -81,7 +82,6 @@ public class FitStepService {
         final WritableArray stepSamples = Arguments.createArray();
         final WritableMap stepsData = Arguments.createMap();
         stepsData.putString("endDate", dateFormat.format(timeBounds[1]));
-
 
         rxFit.history().read(dataReadRequest)
             .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
@@ -129,57 +129,5 @@ public class FitStepService {
         }
 
         return step;
-    }
-
-    private long dateToInt(String dateString, long fallback, boolean startOfDay) {
-        long dateTimeStamp = 1;
-
-        try {
-            Date parsedDate = dateFormat.parse(dateString);
-            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-            cal.setTime(parsedDate);
-            if (startOfDay) {
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-            }
-            dateTimeStamp = cal.getTimeInMillis();
-        } catch(Exception e) {
-            Log.e(TAG, "error with the time string, using " + fallback);
-            Log.e(TAG, Log.getStackTraceString(e));
-            dateTimeStamp = fallback;
-        }
-
-        return dateTimeStamp;
-    }
-
-    private long[] getTimeBounds(ReadableMap options) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        Date now = new Date();
-        cal.setTime(now);
-        long endDate = cal.getTimeInMillis();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        long startDateMin = cal.getTimeInMillis();
-        cal.add(Calendar.WEEK_OF_YEAR, -10);
-        long startDate = cal.getTimeInMillis();
-
-        if (options.hasKey("endDate") && !options.isNull("endDate")) {
-            endDate = dateToInt(options.getString("endDate"), endDate, false);
-        }
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = dateToInt(options.getString("startDate"), startDate, true);
-            if (startDate > startDateMin) {
-                startDate = startDateMin;
-            }
-        }
-
-        long[] timeBounds = {startDate, endDate};
-
-        return timeBounds;
     }
 }

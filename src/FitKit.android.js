@@ -1,6 +1,6 @@
 'use strict';
 
-let { FitKit } = require('react-native').NativeModules;
+const { FitKit } = require('react-native').NativeModules;
 import { PermissionsAndroid } from 'react-native';
 
 const initFitKit = (options = {}) => {
