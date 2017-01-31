@@ -124,9 +124,6 @@ public class FitReactModule extends ReactContextBaseJavaModule {
         }
     }
 
-    // TODO: move to "helpers", make static, return timbounds, 1 month back if no startdate, today if no enddate
-    // google fit seems to hang if large span (too many datapoints), therefore 1 month max.
-    // "make it work" -> "make it better"
     private long getStartDate(String startDateString) {
         long startDate = 1;
 
@@ -168,21 +165,28 @@ public class FitReactModule extends ReactContextBaseJavaModule {
         }
     }
 
+    private FitStepObserver mStepObserver = null;
+
     @ReactMethod
     public void initStepCountObserver(ReadableMap options, Promise promise) {
         Log.i(TAG, "initStepCountObserver");
 
-        long startDate = 1;
-
-        if (options.hasKey("startDate") && !options.isNull("startDate")) {
-            startDate = getStartDate(options.getString("startDate"));
-        }
-
         if (rxFit != null) {
-            new FitStepObserver(rxFit, promise, startDate, context);
+            mStepObserver = new FitStepObserver(rxFit, promise, context);
         } else {
             promise.reject("must init first");
         }
+    }
+
+    @ReactMethod
+    public void removeStepObserver(ReadableMap options, Promise promise) {
+      Log.i(TAG, "removeStepObserver");
+
+      if (mStepObserver != null) {
+        mStepObserver.removeStepObserver();
+      }
+
+      promise.resolve("subscripton probably removed");
     }
 
     private FitBodyMetricsService mReceiver;

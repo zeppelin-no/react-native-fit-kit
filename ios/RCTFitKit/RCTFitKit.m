@@ -152,6 +152,11 @@ RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input resolver:(RCTPromi
     [self fitness_initStepCountObserver:input resolver:resolve rejecter:reject];
 }
 
+RCT_EXPORT_METHOD(removeStepObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self fitness_removeStepObserver:input resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(getLatestWeight:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self body_getLatestWeight:input resolver:resolve rejecter:reject];
