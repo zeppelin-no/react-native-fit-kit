@@ -87,10 +87,19 @@
          }
 
          completionHandler();
-         
      }];
     
     [self.healthStore executeQuery:query];
+    resolve(@YES);
+}
+
+- (void)fitness_removeStepObserver:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
+{
+    NSLog(@"fitness_removeStepObserver");
+    
+    [self.pedometer stopPedometerUpdates];
+    
+    resolve(@YES);
 }
 
 
