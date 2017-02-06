@@ -98,6 +98,10 @@ public class FitStepObserver {
 
           ReactContext reactContext = (ReactContext) context;
 
+          Log.i(TAG, Long.toString(dataPoint.getEndTime(TimeUnit.MILLISECONDS)));
+          Log.i(TAG, Long.toString(dataPoint.getStartTime(TimeUnit.MILLISECONDS)));
+          // Log.i(TAG, "getDataPoints(sensorRequest) Observable done! :(");
+
           for (Field field : dataPoint.getDataType().getFields()) {
               Value val = dataPoint.getValue(field);
               Log.i(TAG, "Detected DataPoint field: " + field.getName());
@@ -134,7 +138,7 @@ public class FitStepObserver {
       .subscribe(new Observer<DataSource>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "Observable done!");
+          Log.i(TAG, "step listner observable done!");
           promise.resolve("observable stepSource found");
         }
 
@@ -147,10 +151,9 @@ public class FitStepObserver {
 
         @Override
         public void onNext(DataSource dataSource) {
-          Log.i(TAG, "Data returned for Data type: " + dataSource);
+          Log.i(TAG, "Data returned for Data type: " + dataSource.getDataType());
 
           if (dataSource.getDataType().equals(DataType.TYPE_STEP_COUNT_DELTA)) {
-            Log.i(TAG, "daym!!");
             registerFitnessDataListener(dataSource, dataSource.getDataType());
           }
         }
