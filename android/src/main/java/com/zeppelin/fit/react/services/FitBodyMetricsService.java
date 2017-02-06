@@ -76,7 +76,7 @@ public class FitBodyMetricsService {
             .subscribe(new Observer<DataSet>() {
                 @Override
                 public void onCompleted() {
-                    Log.i(TAG, "Observable done!");
+                    Log.i(TAG, "bodyMetrics observable done!");
                     bodyMetrics.putArray("bodySamples", bodySamples);
                     bodyMetrics.putString("endDate", dateFormat.format(endTime));
                     promise.resolve(bodyMetrics);
@@ -171,7 +171,7 @@ public class FitBodyMetricsService {
                 .subscribe(new Observer<Status>() {
                     @Override
                     public void onCompleted() {
-                        Log.i(TAG, "Observable done!");
+                        Log.i(TAG, "save waight observable done!");
                         promise.resolve("");
                     }
 
@@ -208,7 +208,7 @@ public class FitBodyMetricsService {
                 .subscribe(new Observer<Status>() {
                     @Override
                     public void onCompleted() {
-                        Log.i(TAG, "Observable done!");
+                        Log.i(TAG, "save height observable done!");
                         promise.resolve("");
                     }
 

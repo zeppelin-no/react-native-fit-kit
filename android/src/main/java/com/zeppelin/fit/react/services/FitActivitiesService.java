@@ -169,6 +169,7 @@ public class FitActivitiesService {
     SessionReadRequest readRequest = new SessionReadRequest.Builder()
       .setTimeInterval(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
       .read(DataType.TYPE_DISTANCE_DELTA)
+      .read(DataType.AGGREGATE_CALORIES_EXPENDED)
       // .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
       .readSessionsFromAllApps()
       .build();
@@ -177,29 +178,34 @@ public class FitActivitiesService {
   }
 
   private WritableMap handleDataSet(DataSet dataSet) {
-      WritableMap dataSetMap = Arguments.createMap();
+    WritableMap dataSetMap = Arguments.createMap();
 
-      for (DataPoint dp : dataSet.getDataPoints()) {
-          DateFormat dateFormat = getTimeInstance();
+    for (DataPoint dp : dataSet.getDataPoints()) {
+      DateFormat dateFormat = getTimeInstance();
 
-          for(Field field : dp.getDataType().getFields()) {
+      for(Field field : dp.getDataType().getFields()) {
 
-              WritableMap fieldMap = Arguments.createMap();
+        WritableMap fieldMap = Arguments.createMap();
 
-              switch (field.getName()) {
-                  case "distance":
-                      fieldMap.putString("unit", "km");
-                      fieldMap.putDouble("value", dp.getValue(field).asFloat() / 1000);
-                      dataSetMap.putMap("distance", fieldMap);
-                      break;
-                  default:
-                      fieldMap.putString("value", dp.getValue(field).toString());
-                      dataSetMap.putMap(field.getName(), fieldMap);
-              }
-          }
+        switch (field.getName()) {
+          case "distance":
+            fieldMap.putString("unit", "km");
+            fieldMap.putDouble("value", dp.getValue(field).asFloat() / 1000);
+            dataSetMap.putMap("distance", fieldMap);
+            break;
+          case "calories":
+            fieldMap.putString("unit", "kcal");
+            fieldMap.putString("value", dp.getValue(field).toString());
+            dataSetMap.putMap("calories", fieldMap);
+            break;
+          default:
+            fieldMap.putString("value", dp.getValue(field).toString());
+            dataSetMap.putMap(field.getName(), fieldMap);
+        }
       }
+    }
 
-      return dataSetMap;
+    return dataSetMap;
   }
 
   private void readActivities(final Promise promise, Context context, long[] timeBounds) {
@@ -211,13 +217,13 @@ public class FitActivitiesService {
       .subscribe(new Observer<SessionReadResult>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "Observable done!");
+          Log.i(TAG, "readActivities observable done!");
           promise.resolve(activities);
         }
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "ooops error");
+          Log.e(TAG, "readActivities observable error");
           e.printStackTrace();
           promise.reject("getActivities error!");
         }
