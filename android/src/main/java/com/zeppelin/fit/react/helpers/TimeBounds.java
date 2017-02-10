@@ -41,6 +41,10 @@ public class TimeBounds {
   }
 
   public static long[] getTimeBounds(ReadableMap options) {
+    return getTimeBounds(options, true);
+  }
+
+  public static long[] getTimeBounds(ReadableMap options, boolean startOfDay) {
     Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     Date now = new Date();
     cal.setTime(now);
@@ -58,8 +62,8 @@ public class TimeBounds {
     }
 
     if (options.hasKey("startDate") && !options.isNull("startDate")) {
-      startDate = dateToInt(options.getString("startDate"), startDate, true);
-      if (startDate > startDateMin) {
+      startDate = dateToInt(options.getString("startDate"), startDate, startOfDay);
+      if (startDate > startDateMin && startOfDay) {
         startDate = startDateMin;
       }
     }

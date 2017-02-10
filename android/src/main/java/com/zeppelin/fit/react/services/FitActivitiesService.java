@@ -64,7 +64,7 @@ public class FitActivitiesService {
   public FitActivitiesService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
     initGFToFKMap();
-    long[] timeBounds = TimeBounds.getTimeBounds(options);
+    long[] timeBounds = TimeBounds.getTimeBounds(options, false);
     readActivities(promise, context, timeBounds);
   }
 
