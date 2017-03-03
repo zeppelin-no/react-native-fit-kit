@@ -9,7 +9,7 @@
 // #import "RCTEventDispatcher.h"
 // #import "RCTEventDispatcher.h"
 
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 
 @implementation RCTFitKit (Events)
 

@@ -7,8 +7,8 @@
 #import "RCTFitKit+Queries.h"
 #import "RCTFitKit+Utils.h"
 
-#import "RCTBridge.h"
-#import "RCTEventDispatcher.h"
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventDispatcher.h>
 
 @import CoreMotion;
 

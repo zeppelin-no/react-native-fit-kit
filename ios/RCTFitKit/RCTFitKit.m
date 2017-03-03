@@ -17,7 +17,7 @@
 
 #import "RCTFitKit+Events.h"
 
-#import "RCTBridge.h"
+#import <React/RCTBridgeModule.h>
 // #import "RCTEventDispatcher.h"
 
 @import CoreMotion;

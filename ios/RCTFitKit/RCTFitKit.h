@@ -5,10 +5,12 @@
 
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
-#import "RCTBridgeModule.h"
-#import "RCTUtils.h"
-#import "RCTLog.h"
-#import <RCTEventEmitter.h>
+
+#import <React/RCTBridgeModule.h>
+#import <React/RCTUtils.h>
+#import <React/RCTLog.h>
+
+#import <React/RCTEventEmitter.h>
 @import CoreMotion;
 
 @interface RCTFitKit : RCTEventEmitter <RCTBridgeModule>
