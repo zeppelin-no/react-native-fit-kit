@@ -49,6 +49,7 @@ public class FitStepService {
     private RxFit rxFit;
     public static final String TAG = "RCTFitKit";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
 
     public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
         this.rxFit = rxFit;
@@ -121,7 +122,7 @@ public class FitStepService {
             for(Field field : dp.getDataType().getFields()) {
                 switch (field.getName()) {
                     case "steps":
-                        step.putString("date", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+                        step.putString("date", dateFormatSimple.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
                         step.putInt("value", dp.getValue(field).asInt());
                         break;
                 }
