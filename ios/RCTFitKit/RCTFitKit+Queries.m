@@ -8,349 +8,311 @@
 
 @implementation RCTFitKit (Queries)
 
+- (void)fetchMostRecentQuantitySampleOfType:(HKQuantityType*)quantityType
+                                  predicate:(NSPredicate*)predicate
+                                 completion:(void (^)(HKQuantity*, NSDate*, NSDate*, NSError*))completion {
+    NSSortDescriptor* timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate ascending:NO];
 
-- (void)fetchMostRecentQuantitySampleOfType:(HKQuantityType *)quantityType
-                                  predicate:(NSPredicate *)predicate
-                                 completion:(void (^)(HKQuantity *, NSDate *, NSDate *, NSError *))completion {
+    HKSampleQuery* query = [[HKSampleQuery alloc] initWithSampleType:quantityType
+                                                           predicate:predicate
+                                                               limit:1
+                                                     sortDescriptors:@[ timeSortDescriptor ]
+                                                      resultsHandler:^(HKSampleQuery* query, NSArray* results, NSError* error) {
 
-    NSSortDescriptor *timeSortDescriptor = [[NSSortDescriptor alloc]
-            initWithKey:HKSampleSortIdentifierEndDate
-              ascending:NO
-    ];
+                                                        if (!results) {
+                                                            if (completion) {
+                                                                completion(nil, nil, nil, error);
+                                                            }
+                                                            return;
+                                                        }
 
-    HKSampleQuery *query = [[HKSampleQuery alloc]
-            initWithSampleType:quantityType
-                     predicate:predicate
-                         limit:1
-               sortDescriptors:@[timeSortDescriptor]
-                resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
-
-                      if (!results) {
-                          if (completion) {
-                              completion(nil, nil, nil, error);
-                          }
-                          return;
-                      }
-
-                      if (completion) {
-                          // If quantity isn't in the database, return nil in the completion block.
-                          HKQuantitySample *quantitySample = results.firstObject;
-                          HKQuantity *quantity = quantitySample.quantity;
-                          NSDate *startDate = quantitySample.startDate;
-                          NSDate *endDate = quantitySample.endDate;
-                          completion(quantity, startDate, endDate, error);
-                      }
-                }
-    ];
+                                                        if (completion) {
+                                                            // If quantity isn't in the database, return nil in the completion block.
+                                                            HKQuantitySample* quantitySample = results.firstObject;
+                                                            HKQuantity* quantity = quantitySample.quantity;
+                                                            NSDate* startDate = quantitySample.startDate;
+                                                            NSDate* endDate = quantitySample.endDate;
+                                                            completion(quantity, startDate, endDate, error);
+                                                        }
+                                                      }];
     [self.healthStore executeQuery:query];
 }
 
-- (void)fetchQuantitySamplesOfType:(HKQuantityType *)quantityType
-                              unit:(HKUnit *)unit
-                         predicate:(NSPredicate *)predicate
+- (void)fetchQuantitySamplesOfType:(HKQuantityType*)quantityType
+                              unit:(HKUnit*)unit
+                         predicate:(NSPredicate*)predicate
                          ascending:(BOOL)asc
                              limit:(NSUInteger)lim
-                        completion:(void (^)(NSArray *, NSError *))completion {
-
-    NSSortDescriptor *timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate
-                                                                       ascending:asc];
+                        completion:(void (^)(NSArray*, NSError*))completion {
+    NSSortDescriptor* timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate ascending:asc];
 
     // declare the block
-    void (^handlerBlock)(HKSampleQuery *query, NSArray *results, NSError *error);
+    void (^handlerBlock)(HKSampleQuery* query, NSArray* results, NSError* error);
     // create and assign the block
-    handlerBlock = ^(HKSampleQuery *query, NSArray *results, NSError *error) {
-        if (!results) {
-            if (completion) {
-                completion(nil, error);
+    handlerBlock = ^(HKSampleQuery* query, NSArray* results, NSError* error) {
+      if (!results) {
+          if (completion) {
+              completion(nil, error);
+          }
+          return;
+      }
+
+      if (completion) {
+          NSMutableArray* data = [NSMutableArray arrayWithCapacity:1];
+
+          dispatch_async(dispatch_get_main_queue(), ^{
+
+            for (HKQuantitySample* sample in results) {
+                HKQuantity* quantity = sample.quantity;
+                double value = [quantity doubleValueForUnit:unit];
+
+                NSString* startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
+                NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
+
+                NSDictionary* elem = @{
+                    @"value" : @(value),
+                    @"startDate" : startDateString,
+                    @"endDate" : endDateString,
+                    @"metadata" : sample.metadata,
+                    @"id" : sample.UUID.UUIDString,
+                };
+
+                [data addObject:elem];
             }
-            return;
-        }
 
-        if (completion) {
-            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
-
-            dispatch_async(dispatch_get_main_queue(), ^{
-
-                for (HKQuantitySample *sample in results) {
-                    HKQuantity *quantity = sample.quantity;
-                    double value = [quantity doubleValueForUnit:unit];
-
-                    NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
-                    NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
-
-                    NSDictionary *elem = @{
-                            @"value" : @(value),
-                            @"startDate" : startDateString,
-                            @"endDate" : endDateString,
-                    };
-
-                    [data addObject:elem];
-                }
-
-                completion(data, error);
-            });
-        }
+            completion(data, error);
+          });
+      }
     };
 
-
-    HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:quantityType
+    HKSampleQuery* query = [[HKSampleQuery alloc] initWithSampleType:quantityType
                                                            predicate:predicate
                                                                limit:lim
-                                                     sortDescriptors:@[timeSortDescriptor]
+                                                     sortDescriptors:@[ timeSortDescriptor ]
                                                       resultsHandler:handlerBlock];
 
     [self.healthStore executeQuery:query];
 }
 
-
-- (void)fetchCorrelationSamplesOfType:(HKQuantityType *)quantityType
-                                 unit:(HKUnit *)unit
-                            predicate:(NSPredicate *)predicate
+- (void)fetchCorrelationSamplesOfType:(HKQuantityType*)quantityType
+                                 unit:(HKUnit*)unit
+                            predicate:(NSPredicate*)predicate
                             ascending:(BOOL)asc
                                 limit:(NSUInteger)lim
-                           completion:(void (^)(NSArray *, NSError *))completion {
-
-    NSSortDescriptor *timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate
-                                                                       ascending:asc];
+                           completion:(void (^)(NSArray*, NSError*))completion {
+    NSSortDescriptor* timeSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate ascending:asc];
 
     // declare the block
-    void (^handlerBlock)(HKSampleQuery *query, NSArray *results, NSError *error);
+    void (^handlerBlock)(HKSampleQuery* query, NSArray* results, NSError* error);
     // create and assign the block
-    handlerBlock = ^(HKSampleQuery *query, NSArray *results, NSError *error) {
-        if (!results) {
-            if (completion) {
-                completion(nil, error);
+    handlerBlock = ^(HKSampleQuery* query, NSArray* results, NSError* error) {
+      if (!results) {
+          if (completion) {
+              completion(nil, error);
+          }
+          return;
+      }
+
+      if (completion) {
+          NSMutableArray* data = [NSMutableArray arrayWithCapacity:1];
+
+          dispatch_async(dispatch_get_main_queue(), ^{
+
+            for (HKCorrelation* sample in results) {
+                NSString* startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
+                NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
+
+                NSDictionary* elem = @{
+                    @"correlation" : sample,
+                    @"startDate" : startDateString,
+                    @"endDate" : endDateString,
+                };
+
+                [data addObject:elem];
             }
-            return;
-        }
 
-        if (completion) {
-            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
-
-            dispatch_async(dispatch_get_main_queue(), ^{
-
-                for (HKCorrelation *sample in results) {
-
-                    NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
-                    NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
-
-                    NSDictionary *elem = @{
-                                           @"correlation" : sample,
-                                           @"startDate" : startDateString,
-                                           @"endDate" : endDateString,
-                                           };
-
-                    [data addObject:elem];
-                }
-
-                completion(data, error);
-            });
-        }
+            completion(data, error);
+          });
+      }
     };
 
-
-    HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:quantityType
+    HKSampleQuery* query = [[HKSampleQuery alloc] initWithSampleType:quantityType
                                                            predicate:predicate
                                                                limit:lim
-                                                     sortDescriptors:@[timeSortDescriptor]
+                                                     sortDescriptors:@[ timeSortDescriptor ]
                                                       resultsHandler:handlerBlock];
 
     [self.healthStore executeQuery:query];
 }
 
+- (void)fetchSumOfSamplesTodayForType:(HKQuantityType*)quantityType
+                                 unit:(HKUnit*)unit
+                           completion:(void (^)(double, NSError*))completionHandler {
+    NSPredicate* predicate = [RCTFitKit predicateForSamplesToday];
+    HKStatisticsQuery* query =
+        [[HKStatisticsQuery alloc] initWithQuantityType:quantityType
+                                quantitySamplePredicate:predicate
+                                                options:HKStatisticsOptionCumulativeSum
+                                      completionHandler:^(HKStatisticsQuery* query, HKStatistics* result, NSError* error) {
 
+                                        HKQuantity* sum = [result sumQuantity];
+                                        if (completionHandler) {
+                                            double value = [sum doubleValueForUnit:unit];
+                                            completionHandler(value, error);
+                                        }
 
-
-
-
-- (void)fetchSumOfSamplesTodayForType:(HKQuantityType *)quantityType
-                                 unit:(HKUnit *)unit
-                           completion:(void (^)(double, NSError *))completionHandler {
-
-    NSPredicate *predicate = [RCTFitKit predicateForSamplesToday];
-    HKStatisticsQuery *query = [[HKStatisticsQuery alloc] initWithQuantityType:quantityType
-                                                          quantitySamplePredicate:predicate
-                                                          options:HKStatisticsOptionCumulativeSum
-                                                          completionHandler:^(HKStatisticsQuery *query, HKStatistics *result, NSError *error) {
-
-                                                                HKQuantity *sum = [result sumQuantity];
-                                                                if (completionHandler) {
-                                                                    double value = [sum doubleValueForUnit:unit];
-                                                                    completionHandler(value, error);
-                                                                }
-
-                                                          }];
+                                      }];
 
     [self.healthStore executeQuery:query];
 }
 
+- (void)fetchSumOfSamplesOnDayForType:(HKQuantityType*)quantityType
+                                 unit:(HKUnit*)unit
+                                  day:(NSDate*)day
+                           completion:(void (^)(double, NSDate*, NSDate*, NSError*))completionHandler {
+    NSPredicate* predicate = [RCTFitKit predicateForSamplesOnDay:day];
+    HKStatisticsQuery* query =
+        [[HKStatisticsQuery alloc] initWithQuantityType:quantityType
+                                quantitySamplePredicate:predicate
+                                                options:HKStatisticsOptionCumulativeSum
+                                      completionHandler:^(HKStatisticsQuery* query, HKStatistics* result, NSError* error) {
 
+                                        HKQuantity* sum = [result sumQuantity];
+                                        NSDate* startDate = result.startDate;
+                                        NSDate* endDate = result.endDate;
+                                        if (completionHandler) {
+                                            double value = [sum doubleValueForUnit:unit];
+                                            completionHandler(value, startDate, endDate, error);
+                                        }
 
-
-
-
-
-
-
-- (void)fetchSumOfSamplesOnDayForType:(HKQuantityType *)quantityType
-                                 unit:(HKUnit *)unit
-                                  day:(NSDate *)day
-                           completion:(void (^)(double, NSDate *, NSDate *, NSError *))completionHandler {
-
-    NSPredicate *predicate = [RCTFitKit predicateForSamplesOnDay:day];
-    HKStatisticsQuery *query = [[HKStatisticsQuery alloc] initWithQuantityType:quantityType
-                                                          quantitySamplePredicate:predicate
-                                                          options:HKStatisticsOptionCumulativeSum
-                                                          completionHandler:^(HKStatisticsQuery *query, HKStatistics *result, NSError *error) {
-
-                                                              HKQuantity *sum = [result sumQuantity];
-                                                              NSDate *startDate = result.startDate;
-                                                              NSDate *endDate = result.endDate;
-                                                              if (completionHandler) {
-                                                                     double value = [sum doubleValueForUnit:unit];
-                                                                     completionHandler(value,startDate, endDate, error);
-                                                              }
-
-                                                          }];
+                                      }];
 
     [self.healthStore executeQuery:query];
 }
 
-
-
-
-
-
-
-
-
-- (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType *)quantityType
-                                          unit:(HKUnit *)unit
-                                     startDate:(NSDate *)startDate
-                                       endDate:(NSDate *)endDate
-                                    completion:(void (^)(NSArray *, NSError *))completionHandler {
-
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *interval = [[NSDateComponents alloc] init];
+- (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType*)quantityType
+                                          unit:(HKUnit*)unit
+                                     startDate:(NSDate*)startDate
+                                       endDate:(NSDate*)endDate
+                                    completion:(void (^)(NSArray*, NSError*))completionHandler {
+    NSCalendar* calendar = [NSCalendar currentCalendar];
+    NSDateComponents* interval = [[NSDateComponents alloc] init];
     interval.day = 1;
 
-    NSDateComponents *anchorComponents = [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
-                                                     fromDate:[NSDate date]];
+    NSDateComponents* anchorComponents =
+        [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[NSDate date]];
     anchorComponents.hour = 0;
-    NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
+    NSDate* anchorDate = [calendar dateFromComponents:anchorComponents];
 
     // Create the query
-    HKStatisticsCollectionQuery *query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
+    HKStatisticsCollectionQuery* query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
                                                                            quantitySamplePredicate:nil
                                                                                            options:HKStatisticsOptionCumulativeSum
                                                                                         anchorDate:anchorDate
                                                                                 intervalComponents:interval];
 
     // Set the results handler
-    query.initialResultsHandler = ^(HKStatisticsCollectionQuery *query, HKStatisticsCollection *results, NSError *error) {
-        if (error) {
-            // Perform proper error handling here
-            NSLog(@"*** An error occurred while calculating the statistics: %@ ***",error.localizedDescription);
-        }
+    query.initialResultsHandler = ^(HKStatisticsCollectionQuery* query, HKStatisticsCollection* results, NSError* error) {
+      if (error) {
+          // Perform proper error handling here
+          NSLog(@"*** An error occurred while calculating the statistics: %@ ***", error.localizedDescription);
+      }
 
-        NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
-        [results enumerateStatisticsFromDate:startDate
-                                      toDate:endDate
-                                   withBlock:^(HKStatistics *result, BOOL *stop) {
+      NSMutableArray* data = [NSMutableArray arrayWithCapacity:1];
+      [results enumerateStatisticsFromDate:startDate
+                                    toDate:endDate
+                                 withBlock:^(HKStatistics* result, BOOL* stop) {
 
-                                       HKQuantity *quantity = result.sumQuantity;
-                                       if (quantity) {
-                                           NSDate *date = result.startDate;
-                                           double value = [quantity doubleValueForUnit:[HKUnit countUnit]];
-                                           NSLog(@"%@: %f", date, value);
+                                   HKQuantity* quantity = result.sumQuantity;
+                                   if (quantity) {
+                                       NSDate* date = result.startDate;
+                                       double value = [quantity doubleValueForUnit:[HKUnit countUnit]];
+                                       NSLog(@"%@: %f", date, value);
 
-                                           NSString *dateString = [RCTFitKit buildISO8601StringFromDate:date];
+                                       NSString* dateString = [RCTFitKit buildISO8601StringFromDate:date];
 
-                                           NSArray *elem = @[dateString, @(value)];
+                                       NSArray* elem = @[ dateString, @(value) ];
 
-                                           [data addObject:elem];
-                                       }
+                                       [data addObject:elem];
+                                   }
 
-                                   }];
-        NSError *err;
-        completionHandler(data, err);
+                                 }];
+      NSError* err;
+      completionHandler(data, err);
 
     };
 
     [self.healthStore executeQuery:query];
 }
 
-
-- (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType *)quantityType
-                                          unit:(HKUnit *)unit
-                                     startDate:(NSDate *)startDate
-                                       endDate:(NSDate *)endDate
+- (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType*)quantityType
+                                          unit:(HKUnit*)unit
+                                     startDate:(NSDate*)startDate
+                                       endDate:(NSDate*)endDate
                                      ascending:(BOOL)asc
                                          limit:(NSUInteger)lim
-                                    completion:(void (^)(NSArray *, NSError *))completionHandler {
-
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *interval = [[NSDateComponents alloc] init];
+                                    completion:(void (^)(NSArray*, NSError*))completionHandler {
+    NSCalendar* calendar = [NSCalendar currentCalendar];
+    NSDateComponents* interval = [[NSDateComponents alloc] init];
     interval.day = 1;
 
-    NSDateComponents *anchorComponents = [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
-                                                     fromDate:[NSDate date]];
+    NSDateComponents* anchorComponents =
+        [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[NSDate date]];
     anchorComponents.hour = 0;
-    NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
-    
-    
+    NSDate* anchorDate = [calendar dateFromComponents:anchorComponents];
+
     // Create the query
-    HKStatisticsCollectionQuery *query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
+    HKStatisticsCollectionQuery* query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
                                                                            quantitySamplePredicate:nil
                                                                                            options:HKStatisticsOptionCumulativeSum
                                                                                         anchorDate:anchorDate
                                                                                 intervalComponents:interval];
 
     // Set the results handler
-    query.initialResultsHandler = ^(HKStatisticsCollectionQuery *query, HKStatisticsCollection *results, NSError *error) {
-        if (error) {
-            // Perform proper error handling here
-            NSLog(@"*** An error occurred while calculating the statistics: %@ ***", error.localizedDescription);
-        }
+    query.initialResultsHandler = ^(HKStatisticsCollectionQuery* query, HKStatisticsCollection* results, NSError* error) {
+      if (error) {
+          // Perform proper error handling here
+          NSLog(@"*** An error occurred while calculating the statistics: %@ ***", error.localizedDescription);
+      }
 
-        NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+      NSMutableArray* data = [NSMutableArray arrayWithCapacity:1];
 
-        [results enumerateStatisticsFromDate:startDate
-                                      toDate:endDate
-                                   withBlock:^(HKStatistics *result, BOOL *stop) {
+      [results enumerateStatisticsFromDate:startDate
+                                    toDate:endDate
+                                 withBlock:^(HKStatistics* result, BOOL* stop) {
 
-                                       HKQuantity *quantity = result.sumQuantity;
-                                       if (quantity) {
-                                           NSDate *startDate = result.startDate;
-                                           NSDate *endDate = result.endDate;
-                                           double value = [quantity doubleValueForUnit:unit];
-                                           
-                                           NSString *startDateString = [RCTFitKit buildISO8601StringFromDate:startDate];
-                                           NSString *endDateString = [RCTFitKit buildISO8601StringFromDate:endDate];
+                                   HKQuantity* quantity = result.sumQuantity;
+                                   if (quantity) {
+                                       NSDate* startDate = result.startDate;
+                                       NSDate* endDate = result.endDate;
+                                       double value = [quantity doubleValueForUnit:unit];
 
-                                           NSDictionary *elem = @{
-                                                   @"value" : @(value),
-                                                   @"date" : startDateString,
-                                                   //@"endDate" : endDateString,
-                                           };
+                                       NSString* startDateString = [RCTFitKit buildISO8601StringFromDate:startDate];
+                                       NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:endDate];
 
-                                           [data addObject:elem];
-                                       }
+                                       NSDictionary* elem = @{
+                                           @"value" : @(value),
+                                           @"date" : startDateString,
+                                           //@"endDate" : endDateString,
+                                       };
 
-                                   }];
-        // is ascending by default
-        if(asc == false) {
-            [RCTFitKit reverseNSMutableArray:data];
-        }
+                                       [data addObject:elem];
+                                   }
 
-        if(lim > 0) {
-            NSArray* slicedArray = [data subarrayWithRange:NSMakeRange(0, lim)];
-            NSError *err;
-            completionHandler(slicedArray, err);
-        } else {
-            NSError *err;
-            completionHandler(data, err);
-        }
+                                 }];
+      // is ascending by default
+      if (asc == false) {
+          [RCTFitKit reverseNSMutableArray:data];
+      }
+
+      if (lim > 0) {
+          NSArray* slicedArray = [data subarrayWithRange:NSMakeRange(0, lim)];
+          NSError* err;
+          completionHandler(slicedArray, err);
+      } else {
+          NSError* err;
+          completionHandler(data, err);
+      }
     };
 
     [self.healthStore executeQuery:query];
