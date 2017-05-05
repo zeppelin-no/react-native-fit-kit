@@ -137,6 +137,11 @@ RCT_EXPORT_METHOD(getDailySteps:(NSDictionary *)input resolver:(RCTPromiseResolv
     [self fitness_getDailySteps:input resolver:resolve rejecter:reject];
 }
 
+RCT_EXPORT_METHOD(getStepsDataPoints:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self fitness_getStepsDataPoints:input resolver:resolve rejecter:reject];
+}
+
 RCT_EXPORT_METHOD(getActivities:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self workout_getActivities:input resolver:resolve rejecter:reject];
@@ -208,6 +213,8 @@ RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input resolver:(RCTPromiseResol
     self.pedometer = [[CMPedometer alloc]init];
     
     if ([HKHealthStore isHealthDataAvailable]) {
+        NSLog(@"initializeHealthKit - isHealthDataAvailable");
+        
         NSSet *writeDataTypes;
         NSSet *readDataTypes;
 

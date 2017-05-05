@@ -31,6 +31,7 @@ import android.content.ComponentName;
 import com.zeppelin.fit.react.services.FitBodyMetricsService;
 import com.zeppelin.fit.react.services.FitActivitiesService;
 import com.zeppelin.fit.react.services.FitStepService;
+import com.zeppelin.fit.react.services.FitStepsDatapointsService;
 import com.zeppelin.fit.react.observers.FitStepObserver;
 
 // rx fit:
@@ -163,6 +164,18 @@ public class FitReactModule extends ReactContextBaseJavaModule {
         } else {
             promise.reject("must init first");
         }
+    }
+
+
+    @ReactMethod
+    public void getStepsDataPoints(ReadableMap options, Promise promise) {
+      Log.i(TAG, "getStepsDataPoints");
+
+      if (rxFit != null) {
+        new FitStepsDatapointsService(rxFit, promise, context, options);
+      } else {
+        promise.reject("must init first");
+      }
     }
 
     private FitStepObserver mStepObserver = null;
