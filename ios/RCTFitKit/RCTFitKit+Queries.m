@@ -73,8 +73,8 @@
                     @"value" : @(value),
                     @"startDate" : startDateString,
                     @"endDate" : endDateString,
-                    @"metadata" : sample.metadata,
-                    @"id" : sample.UUID.UUIDString,
+                    // @"metadata" : sample.metadata,
+                    @"blockId" : sample.UUID.UUIDString,
                 };
 
                 [data addObject:elem];

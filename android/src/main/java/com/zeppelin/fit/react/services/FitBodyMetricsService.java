@@ -188,7 +188,7 @@ public class FitBodyMetricsService {
                     }
                 });
         } catch (Exception e) {
-            promise.reject("convert weight error", e);
+            promise.reject("saveWeight error", e);
         }
 
     }
@@ -225,7 +225,7 @@ public class FitBodyMetricsService {
                     }
                 });
         } catch (Exception e) {
-            promise.reject("convert weight error", e);
+            promise.reject("saveHeight error", e);
         }
 
     }

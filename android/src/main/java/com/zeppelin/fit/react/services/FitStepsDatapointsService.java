@@ -80,7 +80,7 @@ public class FitStepsDatapointsService {
       .subscribe(new Observer<DataReadResult>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "getDailySteps completed");
+          Log.i(TAG, "getStepsDatapoints completed");
           stepsData.putArray("stepSamples", stepSamples);
           promise.resolve(stepsData);
         }
@@ -110,8 +110,12 @@ public class FitStepsDatapointsService {
     switch (field.getName()) {
       case "steps":
         step.putString("startDate", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+
         step.putString("endDate", dateFormat.format(dp.getTimestamp(TimeUnit.MILLISECONDS)));
+
         step.putInt("value", dp.getValue(field).asInt());
+
+        step.putString("blockId", dp.hashCode() + "");
         break;
     }
 
