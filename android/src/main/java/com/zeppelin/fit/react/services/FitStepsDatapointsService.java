@@ -41,6 +41,8 @@ import java.util.Map;
 import java.sql.Timestamp;
 import java.util.TimeZone;
 
+import java.util.UUID;
+
 // helpers:
 import com.zeppelin.fit.react.helpers.TimeBounds;
 import com.zeppelin.fit.react.helpers.StepsDataSource;
@@ -115,7 +117,10 @@ public class FitStepsDatapointsService {
 
         step.putInt("value", dp.getValue(field).asInt());
 
-        step.putString("blockId", dp.hashCode() + "");
+        String hash = TAG + Integer.toString(dp.hashCode());
+        UUID uuid = UUID.nameUUIDFromBytes(hash.getBytes());
+
+        step.putString("blockId", uuid.toString());
         break;
     }
 
