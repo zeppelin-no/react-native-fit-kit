@@ -61,20 +61,24 @@
     NSPredicate* predicate = [RCTFitKit predicateForSamplesBetweenDates:startDate endDate:endDate];
 
     [self fetchQuantitySamplesOfType:stepCountType
-                                   unit:unit
-                              predicate:predicate
-                              ascending:ascending
-                                  limit:limit
-                             completion:^(NSArray* results, NSError* error) {
-                               if (!error && results) {
-                                  
-                                   resolve(results);
-                               } else {
-                                   NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", error);
-                                   reject(@"error with fetchCumulativeSumStatisticsCollection", nil, nil);
-                                   return;
-                               }
-                             }];
+                                unit:unit
+                           predicate:predicate
+                           ascending:ascending
+                               limit:limit
+                          completion:^(NSArray* results, NSError* error) {
+                            if (!error && results) {
+                                NSLog(@"fitness_getDailySteps - got steps");
+                                NSDictionary* response = @{
+                                    @"stepSamples" : [[results reverseObjectEnumerator] allObjects],
+                                    @"endDate" : [RCTFitKit buildISO8601StringFromDate:endDate],
+                                };
+                                resolve(response);
+                            } else {
+                                NSLog(@"error with fetchCumulativeSumStatisticsCollection: %@", error);
+                                reject(@"error with fetchCumulativeSumStatisticsCollection", nil, nil);
+                                return;
+                            }
+                          }];
 }
 
 - (IBAction)fitness_initStepCountObserver:(NSDictionary*)input

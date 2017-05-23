@@ -66,8 +66,8 @@
                 HKQuantity* quantity = sample.quantity;
                 double value = [quantity doubleValueForUnit:unit];
 
-                NSString* startDateString = [RCTFitKit buildISO8601StringFromDate:sample.startDate];
-                NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:sample.endDate];
+                NSString* startDateString = [RCTFitKit buildISO8601ZuluStringFromDate:sample.startDate];
+                NSString* endDateString = [RCTFitKit buildISO8601ZuluStringFromDate:sample.endDate];
 
                 NSDictionary* elem = @{
                     @"value" : @(value),

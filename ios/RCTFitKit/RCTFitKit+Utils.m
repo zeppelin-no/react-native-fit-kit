@@ -29,6 +29,19 @@
     return [dateFormatter stringFromDate:date];
 }
 
++ (NSString *)buildISO8601ZuluStringFromDate:(NSDate *)date
+{
+    NSDateFormatter *dateFormatter = [NSDateFormatter new];
+    // NSLocale *posix = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+    // dateFormatter.locale = posix;
+    
+    dateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"UTC"];
+    //    dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    dateFormatter.dateFormat = @"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSS'Z'";
+    //         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // android
+    return [dateFormatter stringFromDate:date];
+}
+
 + (NSPredicate *)predicateForSamplesToday {
     NSDate *now = [NSDate date];
     return [RCTFitKit predicateForSamplesOnDay:now];
