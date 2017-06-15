@@ -57,6 +57,8 @@ import rx.functions.Action1;
 import com.google.android.gms.fitness.request.OnDataPointListener;
 import android.app.IntentService;
 
+// helpers:
+
 public class FitStepObserver {
 
   public static final String TAG = "RCTFitKit";
@@ -65,9 +67,9 @@ public class FitStepObserver {
   private Subscription listner = null;
 
   public FitStepObserver(RxFit rxFit, Promise promise, Context context) {
-      this.rxFit = rxFit;
-      this.context = context;
-      init(promise, context);
+    this.rxFit = rxFit;
+    this.context = context;
+    init(promise, context);
   }
 
   private void registerFitnessDataListener(DataSource dataSource, DataType dataType) {

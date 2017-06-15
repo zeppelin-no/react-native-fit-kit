@@ -60,12 +60,17 @@ public class FitActivitiesService {
   public static final String TAG = "RCTFitKit";
   private RxFit rxFit;
   private Map<String, String> googleFitToFitKitActivityMap = new HashMap<String, String>();
+  private Promise mActivityPromise;
 
   public FitActivitiesService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
+
+    Log.i(TAG, "starting FitActivitiesService");
+
     initGFToFKMap();
+
     long[] timeBounds = TimeBounds.getTimeBounds(options, false);
-    readActivities(promise, context, timeBounds);
+    readActivities(promise, timeBounds);
   }
 
   private void initGFToFKMap() {
@@ -208,7 +213,9 @@ public class FitActivitiesService {
     return dataSetMap;
   }
 
-  private void readActivities(final Promise promise, Context context, long[] timeBounds) {
+  private void readActivities(final Promise promise, long[] timeBounds) {
+    mActivityPromise = promise;
+
     SessionReadRequest readRequest = readFitnessSession(timeBounds);
 
     final WritableArray activities = Arguments.createArray();
@@ -218,14 +225,20 @@ public class FitActivitiesService {
         @Override
         public void onCompleted() {
           Log.i(TAG, "readActivities observable done!");
-          promise.resolve(activities);
+          if (mActivityPromise != null) {
+            mActivityPromise.resolve(activities);
+            mActivityPromise = null;
+          }
         }
 
         @Override
         public void onError(Throwable e) {
           Log.e(TAG, "readActivities observable error");
           e.printStackTrace();
-          promise.reject("getActivities error!");
+          if (mActivityPromise != null) {
+            mActivityPromise.reject("getActivities error!", e);
+            mActivityPromise = null;
+          }
         }
 
         @Override

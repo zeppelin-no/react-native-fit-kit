@@ -53,6 +53,7 @@ public class FitStepsDatapointsService {
   public static final String TAG = "RCTFitKit";
   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
+  private Promise mStepPromise;
 
   public FitStepsDatapointsService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
@@ -61,11 +62,16 @@ public class FitStepsDatapointsService {
     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
     long[] timeBounds = TimeBounds.getTimeBounds(options);
+
+
     getDailySteps(promise, timeBounds);
   }
 
   private void getDailySteps(final Promise promise, long[] timeBounds) {
     Log.i(TAG, "getDailySteps");
+
+    // Store the promise to resolve/reject when picker returns data
+    mStepPromise = promise;
 
     DataSource ESTIMATED_STEP_DELTAS = StepsDataSource.get();
 
@@ -84,14 +90,20 @@ public class FitStepsDatapointsService {
         public void onCompleted() {
           Log.i(TAG, "getStepsDatapoints completed");
           stepsData.putArray("stepSamples", stepSamples);
-          promise.resolve(stepsData);
+          if (mStepPromise != null) {
+            mStepPromise.resolve(stepsData);
+            mStepPromise = null;
+          }
         }
 
         @Override
         public void onError(Throwable e) {
           Log.e(TAG, "getDailySteps error");
           Log.e(TAG, Log.getStackTraceString(e));
-          promise.reject("getBodyMetrics error!", e);
+          if (mStepPromise != null) {
+            mStepPromise.reject("getStepsDatapoints error!", e);
+            mStepPromise = null;
+          }
         }
 
         @Override
