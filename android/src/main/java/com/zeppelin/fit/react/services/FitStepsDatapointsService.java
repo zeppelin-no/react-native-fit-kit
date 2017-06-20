@@ -89,8 +89,8 @@ public class FitStepsDatapointsService {
         @Override
         public void onCompleted() {
           Log.i(TAG, "getStepsDatapoints completed");
-          stepsData.putArray("stepSamples", stepSamples);
           if (mStepPromise != null) {
+            stepsData.putArray("stepSamples", stepSamples);
             mStepPromise.resolve(stepsData);
             mStepPromise = null;
           }
@@ -108,10 +108,12 @@ public class FitStepsDatapointsService {
 
         @Override
         public void onNext(DataReadResult bucket) {
-          for (DataSet dataSet : bucket.getDataSets()) {
-            for (DataPoint dp : dataSet.getDataPoints()) {
-              for(Field field : dp.getDataType().getFields()) {
-                stepSamples.pushMap(formatStepData(field, dp));
+          if (mStepPromise != null) {
+            for (DataSet dataSet : bucket.getDataSets()) {
+              for (DataPoint dp : dataSet.getDataPoints()) {
+                for(Field field : dp.getDataType().getFields()) {
+                  stepSamples.pushMap(formatStepData(field, dp));
+                }
               }
             }
           }
