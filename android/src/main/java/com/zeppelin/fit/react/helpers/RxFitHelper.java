@@ -21,6 +21,7 @@ public class RxFitHelper {
 
   private static RxFit rxFit = null;
   private static final String TAG = "RCTFitKit";
+  private static boolean connected = false;
 
   public static void initFitKit(ReadableMap options, final Promise promise, Context context) {
     Log.i(TAG, "");
@@ -29,6 +30,11 @@ public class RxFitHelper {
     Log.i(TAG, "");
     Log.i(TAG, "");
     Log.i(TAG, "initFitKit");
+
+    if (connected && rxFit != null) {
+      promise.resolve(true);
+      return;
+    }
 
     try {
       rxFit = new RxFit(
@@ -53,6 +59,7 @@ public class RxFitHelper {
           @Override
           public void call() {
             Log.i(TAG, "success!!!!");
+            connected = true;
             promise.resolve(true);
           }
         })
@@ -61,6 +68,7 @@ public class RxFitHelper {
           public void call(Throwable error) {
             Log.e(TAG, "error, probably canceled");
             error.printStackTrace();
+            connected = false;
             promise.reject("could not init fit kit", error);
           }
         })
