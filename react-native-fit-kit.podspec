@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/zeppelin-no/react-native-fit-kit.git", :tag => "#{s.version}" }
 
-  s.source_files  = "ios/*.{h,m}"
+  s.source_files  = "ios/**/*.{h,m}"
 
   s.dependency "React"
   s.dependency "Granola"
