@@ -105,16 +105,24 @@
 
                     for (HKQuantitySample* sample in results) {
                         OMHSerializer* serializer = [OMHSerializer new];
-                        NSString* jsonString = [serializer jsonForSample:sample error:nil];
-
-                        NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-                        NSMutableDictionary* jsonResponse = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
-
-                        jsonResponse = [self convertHKActivityType:jsonResponse];
-                        jsonResponse = [self convertSchemaID:jsonResponse];
-                        jsonResponse = [self addSource:jsonResponse sourceRev:sample.sourceRevision];
-                        
-                        [data addObject:jsonResponse];
+                        // might not be needed.
+                        NSError *serializerError = nil;
+                        @try {
+                            NSString* jsonString = [serializer jsonForSample:sample error:&serializerError];
+                            
+                            NSData* jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+                            NSMutableDictionary* jsonResponse = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+                            
+                            jsonResponse = [self convertHKActivityType:jsonResponse];
+                            jsonResponse = [self convertSchemaID:jsonResponse];
+                            jsonResponse = [self addSource:jsonResponse sourceRev:sample.sourceRevision];
+                            
+                            [data addObject:jsonResponse];
+                        }
+                        @catch (NSException *exception) {
+                            NSLog(@"hahahaha exception: %@", exception);
+                            NSLog(@"hahahaha dataWithJSONObject: %@", serializerError);
+                        }
                     }
 
                     resolve(data);
