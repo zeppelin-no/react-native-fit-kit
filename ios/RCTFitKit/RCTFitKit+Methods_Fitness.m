@@ -14,7 +14,9 @@
 
 @implementation RCTFitKit (Methods_Fitness)
 
-- (void)fitness_getDailySteps:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+- (void)fitness_getDailySteps:(NSDictionary*)input
+                     resolver:(RCTPromiseResolveBlock)resolve
+                     rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"fitness_getDailySteps");
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit countUnit]];
     NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
@@ -48,7 +50,9 @@
                                       }];
 }
 
-- (void)fitness_getStepsDataPoints:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+- (void)fitness_getStepsDataPoints:(NSDictionary*)input
+                          resolver:(RCTPromiseResolveBlock)resolve
+                          rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"fitness_getStepsDataPoints");
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit countUnit]];
     NSUInteger limit = [RCTFitKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
@@ -87,36 +91,41 @@
     NSLog(@"fitness_initStepCountObserver");
 
     __block NSInteger previousCount = 0;
-    [self.pedometer startPedometerUpdatesFromDate:[NSDate date]
-                                      withHandler:^(CMPedometerData* _Nullable pedometerData, NSError* _Nullable error) {
+    [self.pedometer
+        startPedometerUpdatesFromDate:[NSDate date]
+                          withHandler:^(CMPedometerData* _Nullable pedometerData, NSError* _Nullable error) {
 
-                                        NSNumberFormatter* formatter = [[NSNumberFormatter alloc] init];
-                                        formatter.maximumFractionDigits = 2;
+                            NSNumberFormatter* formatter = [[NSNumberFormatter alloc] init];
+                            formatter.maximumFractionDigits = 2;
 
-                                        // step counting
-                                        if ([CMPedometer isStepCountingAvailable]) {
-                                            NSInteger numberOfSteps = [pedometerData.numberOfSteps integerValue];
-                                            [self.bridge.eventDispatcher sendAppEventWithName:@"FitKitStepEvent"
-                                                                                         body:@{
-                                                                                             @"steps" : @(numberOfSteps - previousCount)
-                                                                                         }];
-                                            previousCount = numberOfSteps;
-                                            // self.stepsLabel.text = [NSString stringWithFormat:@"Steps walked: %@", [formatter
-                                            // stringFromNumber:pedometerData.numberOfSteps]];
-                                        }
-                                      }];
+                            // step counting
+                            if ([CMPedometer isStepCountingAvailable]) {
+                                NSInteger numberOfSteps = [pedometerData.numberOfSteps integerValue];
+                                [self.bridge.eventDispatcher
+                                    sendAppEventWithName:@"FitKitStepEvent"
+                                                    body:@{
+                                                        @"steps" : @(numberOfSteps - previousCount)
+                                                    }];
+                                previousCount = numberOfSteps;
+                                // self.stepsLabel.text = [NSString stringWithFormat:@"Steps walked: %@", [formatter
+                                // stringFromNumber:pedometerData.numberOfSteps]];
+                            }
+                          }];
 
     HKSampleType* sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
 
     HKObserverQuery* query = [[HKObserverQuery alloc]
         initWithSampleType:sampleType
                  predicate:nil
-             updateHandler:^(HKObserverQuery* query, HKObserverQueryCompletionHandler completionHandler, NSError* error) {
+             updateHandler:^(
+                 HKObserverQuery* query, HKObserverQueryCompletionHandler completionHandler, NSError* error) {
 
                NSLog(@"stepevent!!!");
 
                if (error) {
-                   NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+                   NSLog(
+                       @"*** An error occured while setting up the stepCount observer. %@ ***",
+                       error.localizedDescription);
                    return;
                }
 
@@ -127,7 +136,9 @@
     resolve(@YES);
 }
 
-- (void)fitness_removeStepObserver:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+- (void)fitness_removeStepObserver:(NSDictionary*)input
+                          resolver:(RCTPromiseResolveBlock)resolve
+                          rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"fitness_removeStepObserver");
 
     [self.pedometer stopPedometerUpdates];
@@ -135,7 +146,9 @@
     resolve(@YES);
 }
 
-- (void)fitness_HKObserver:(NSDictionary*)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject {
+- (void)fitness_HKObserver:(NSDictionary*)input
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject {
     NSLog(@"fitness_initStepCountObserver");
 
     HKSampleType* sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
@@ -143,13 +156,16 @@
     HKObserverQuery* query = [[HKObserverQuery alloc]
         initWithSampleType:sampleType
                  predicate:nil
-             updateHandler:^(HKObserverQuery* query, HKObserverQueryCompletionHandler completionHandler, NSError* error) {
+             updateHandler:^(
+                 HKObserverQuery* query, HKObserverQueryCompletionHandler completionHandler, NSError* error) {
 
                NSLog(@"stepevent!!!");
 
                if (error) {
                    // Perform Proper Error Handling Here...
-                   NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+                   NSLog(
+                       @"*** An error occured while setting up the stepCount observer. %@ ***",
+                       error.localizedDescription);
                    reject(@"An error occured while setting up the stepCount observer", nil, nil);
                    return;
                }
@@ -218,7 +234,8 @@
     HKUnit* unit = [HKUnit countUnit];
     HKQuantity* quantity = [HKQuantity quantityWithUnit:unit doubleValue:value];
     HKQuantityType* type = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-    HKQuantitySample* sample = [HKQuantitySample quantitySampleWithType:type quantity:quantity startDate:startDate endDate:endDate];
+    HKQuantitySample* sample =
+        [HKQuantitySample quantitySampleWithType:type quantity:quantity startDate:startDate endDate:endDate];
 
     [self.healthStore saveObject:sample
                   withCompletion:^(BOOL success, NSError* error) {
@@ -235,7 +252,8 @@
     HKUnit* unit = [RCTFitKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit meterUnit]];
     NSDate* date = [RCTFitKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
 
-    HKQuantityType* quantityType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
+    HKQuantityType* quantityType =
+        [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
 
     [self fetchSumOfSamplesOnDayForType:quantityType
                                    unit:unit
@@ -307,6 +325,76 @@
 
                                callback(@[ [NSNull null], response ]);
                              }];
+}
+
+- (void)enableBackgroundDeliveryForQuantityType {
+    [self.healthStore
+        enableBackgroundDeliveryForType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]
+                              frequency:HKUpdateFrequencyImmediate
+                         withCompletion:^(BOOL success, NSError* error) {
+                           NSLog(@"Observation registered error=%@", error);
+                         }];
+}
+
+- (void)observeQuantityType {
+    HKSampleType* quantityType = [HKSampleType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+
+    HKObserverQuery* query = [[HKObserverQuery alloc]
+        initWithSampleType:quantityType
+                 predicate:nil
+             updateHandler:^(
+                 HKObserverQuery* query, HKObserverQueryCompletionHandler completionHandler, NSError* error) {
+
+               [self getQuantityResult:completionHandler];
+
+             }];
+    [self.healthStore executeQuery:query];
+}
+
+- (void)getQuantityResult:(HKObserverQueryCompletionHandler)completionHandler {
+    NSInteger limit = 0;
+    NSCalendar* calendar = [NSCalendar currentCalendar];
+
+    NSDate* now = [NSDate date];
+
+    NSDate* startDate = [calendar dateByAddingUnit:NSCalendarUnitDay value:-1 toDate:now options:0];
+
+    NSDate* endDate = [calendar dateByAddingUnit:NSCalendarUnitDay value:1 toDate:startDate options:0];
+
+    NSPredicate* predicate =
+        [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionNone];
+
+    NSString* endKey = HKSampleSortIdentifierEndDate;
+    NSSortDescriptor* endDateSort = [NSSortDescriptor sortDescriptorWithKey:endKey ascending:NO];
+
+    NSLog(@"Requesting step data");
+
+    HKSampleQuery* query = [[HKSampleQuery alloc]
+        initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]
+                 predicate:predicate
+                     limit:limit
+           sortDescriptors:@[ endDateSort ]
+            resultsHandler:^(HKSampleQuery* query, NSArray* results, NSError* error) {
+
+              NSLog(@"Query completed. error=%@", error);
+
+              NSInteger totalSteps = 0;
+
+              for (HKQuantitySample* sample in results) {
+                  totalSteps += [sample.quantity doubleValueForUnit:[HKUnit countUnit]];
+              }
+              NSLog(@"Sending step data");
+              UILocalNotification* notification = [UILocalNotification new];
+              notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+              notification.alertBody = [NSString stringWithFormat:@"Received step count %ld", totalSteps];
+              [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+              // sends the data using HTTP
+              //    [self sendData: [self resultAsNumber:results]];
+              if (completionHandler)
+                  completionHandler();
+
+            }];
+    [self.healthStore executeQuery:query];
 }
 
 @end

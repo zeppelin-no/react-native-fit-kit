@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D51B57371F7ACC1C001443CC /* RCTFitKit+Methods_Background.m in Sources */ = {isa = PBXBuildFile; fileRef = D51B57361F7ACC1C001443CC /* RCTFitKit+Methods_Background.m */; };
 		D565F0601DAE1FC200AF118B /* RCTFitKit.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F04D1DAE1FC200AF118B /* RCTFitKit.m */; };
 		D565F0611DAE1FC200AF118B /* RCTFitKit+Methods_Body.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F04F1DAE1FC200AF118B /* RCTFitKit+Methods_Body.m */; };
 		D565F0621DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m in Sources */ = {isa = PBXBuildFile; fileRef = D565F0511DAE1FC200AF118B /* RCTFitKit+Methods_Characteristic.m */; };
@@ -40,6 +41,8 @@
 		41B44EE567C15943C5791551 /* Pods-RCTFitKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTFitKit.release.xcconfig"; path = "Pods/Target Support Files/Pods-RCTFitKit/Pods-RCTFitKit.release.xcconfig"; sourceTree = "<group>"; };
 		95A74AEDF92C001BEFB254DB /* Pods-RCTFitKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCTFitKit.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RCTFitKit/Pods-RCTFitKit.debug.xcconfig"; sourceTree = "<group>"; };
 		9782BC629A4123BC3741D2B0 /* libPods-RCTFitKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RCTFitKit.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D51B57351F7ACC0B001443CC /* RCTFitKit+Methods_Background.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RCTFitKit+Methods_Background.h"; sourceTree = "<group>"; };
+		D51B57361F7ACC1C001443CC /* RCTFitKit+Methods_Background.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "RCTFitKit+Methods_Background.m"; sourceTree = "<group>"; };
 		D565F04C1DAE1FC200AF118B /* RCTFitKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RCTFitKit.h; path = RCTFitKit/RCTFitKit.h; sourceTree = SOURCE_ROOT; };
 		D565F04D1DAE1FC200AF118B /* RCTFitKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RCTFitKit.m; path = RCTFitKit/RCTFitKit.m; sourceTree = SOURCE_ROOT; };
 		D565F04E1DAE1FC200AF118B /* RCTFitKit+Methods_Body.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RCTFitKit+Methods_Body.h"; path = "RCTFitKit/RCTFitKit+Methods_Body.h"; sourceTree = SOURCE_ROOT; };
@@ -118,6 +121,8 @@
 				D565F05F1DAE1FC200AF118B /* RCTFitKit+Utils.m */,
 				D569765F1DDB2C0D00F34939 /* RCTFitKit+Events.h */,
 				D56976601DDB2C2900F34939 /* RCTFitKit+Events.m */,
+				D51B57351F7ACC0B001443CC /* RCTFitKit+Methods_Background.h */,
+				D51B57361F7ACC1C001443CC /* RCTFitKit+Methods_Background.m */,
 			);
 			path = RCTFitKit;
 			sourceTree = "<group>";
@@ -198,6 +203,7 @@
 				D565F0691DAE1FC200AF118B /* RCTFitKit+Utils.m in Sources */,
 				D565F0641DAE1FC200AF118B /* RCTFitKit+Methods_Results.m in Sources */,
 				D565F0681DAE1FC200AF118B /* RCTFitKit+TypesAndPermissions.m in Sources */,
+				D51B57371F7ACC1C001443CC /* RCTFitKit+Methods_Background.m in Sources */,
 				D565F0601DAE1FC200AF118B /* RCTFitKit.m in Sources */,
 				D565F0671DAE1FC200AF118B /* RCTFitKit+Queries.m in Sources */,
 				D565F0631DAE1FC200AF118B /* RCTFitKit+Methods_Fitness.m in Sources */,

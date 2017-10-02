@@ -14,6 +14,7 @@
 #import "RCTFitKit+Methods_Characteristic.h"
 #import "RCTFitKit+Methods_Vitals.h"
 #import "RCTFitKit+Methods_Results.h"
+#import "RCTFitKit+Methods_Background.h"
 
 #import "RCTFitKit+Events.h"
 
@@ -195,6 +196,11 @@ RCT_EXPORT_METHOD(getBiologicalSex:(NSDictionary *)input resolver:(RCTPromiseRes
 RCT_EXPORT_METHOD(getDateOfBirth:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self characteristic_getDateOfBirth:input resolver:resolve rejecter:reject];
+}
+
+RCT_EXPORT_METHOD(backgroundDelivery:(NSDictionary *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self background_test:input resolver:resolve rejecter:reject];
 }
 
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
