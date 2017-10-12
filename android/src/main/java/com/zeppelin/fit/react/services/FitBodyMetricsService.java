@@ -39,12 +39,12 @@ import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.common.api.Status;
 
 // helpers:
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitBodyMetricsService {
 
   private RxFit rxFit;
   private Context context;
-  public static final String TAG = "RCTFitKit";
 
   public FitBodyMetricsService(RxFit rxFit, Promise promise, Context context) {
     this.rxFit = rxFit;
@@ -78,7 +78,7 @@ public class FitBodyMetricsService {
       .subscribe(new Observer<DataSet>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "bodyMetrics observable done!");
+          LogH.i("bodyMetrics observable done!");
           bodyMetrics.putArray("bodySamples", bodySamples);
           bodyMetrics.putString("endDate", dateFormat.format(endTime));
           promise.resolve(bodyMetrics);
@@ -86,14 +86,14 @@ public class FitBodyMetricsService {
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "ooops error");
-          Log.e(TAG, Log.getStackTraceString(e));
+          LogH.e("ooops error");
+          LogH.e(Log.getStackTraceString(e));
           promise.reject("getBodyMetrics error!", e);
         }
 
         @Override
         public void onNext(DataSet dataSet) {
-          Log.i(TAG, "Data returned for readBodyMetrics");
+          LogH.i("Data returned for readBodyMetrics");
 
           for (DataPoint dp : dataSet.getDataPoints()) {
             String dateTime = dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS));
@@ -135,7 +135,7 @@ public class FitBodyMetricsService {
     DataSource dataSource = new DataSource.Builder()
       .setAppPackageName(context.getPackageName())
       .setDataType(dataType)
-      .setStreamName(TAG + " - ass count")
+      .setStreamName(LogH.TAG + " - ass count")
       .setType(dataSourceType)
       .build();
 
@@ -172,20 +172,20 @@ public class FitBodyMetricsService {
         .subscribe(new Observer<Status>() {
           @Override
           public void onCompleted() {
-            Log.i(TAG, "save waight observable done!");
+            LogH.i("save waight observable done!");
             promise.resolve("");
           }
 
           @Override
           public void onError(Throwable e) {
-            Log.e(TAG, "ooops error");
-            Log.e(TAG, Log.getStackTraceString(e));
+            LogH.e("ooops error");
+            LogH.e(Log.getStackTraceString(e));
             promise.reject("saveWeight error!", e);
           }
 
           @Override
           public void onNext(Status status) {
-            Log.i(TAG, "Data returned for readBodyMetrics");
+            LogH.i("Data returned for readBodyMetrics");
           }
         });
     } catch (Exception e) {
@@ -208,20 +208,20 @@ public class FitBodyMetricsService {
         .subscribe(new Observer<Status>() {
           @Override
           public void onCompleted() {
-            Log.i(TAG, "save height observable done!");
+            LogH.i("save height observable done!");
             promise.resolve("");
           }
 
           @Override
           public void onError(Throwable e) {
-            Log.e(TAG, "ooops error");
-            Log.e(TAG, Log.getStackTraceString(e));
+            LogH.e("ooops error");
+            LogH.e(Log.getStackTraceString(e));
             promise.reject("saveHeight error!", e);
           }
 
           @Override
           public void onNext(Status status) {
-            Log.i(TAG, "Data returned for readBodyMetrics");
+            LogH.i("Data returned for readBodyMetrics");
           }
         });
     } catch (Exception e) {

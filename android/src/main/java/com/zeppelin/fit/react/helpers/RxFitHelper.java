@@ -1,4 +1,3 @@
-
 package com.zeppelin.fit.react.helpers;
 
 import android.content.Context;
@@ -17,19 +16,20 @@ import rx.Observer;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
+// helpers:
+import com.zeppelin.fit.react.helpers.LogH;
+
 public class RxFitHelper {
 
   private static RxFit rxFit = null;
-  private static final String TAG = "RCTFitKit";
   private static boolean connected = false;
 
   public static void initFitKit(ReadableMap options, final Promise promise, Context context) {
-    Log.i(TAG, "");
-    Log.i(TAG, "");
-    Log.i(TAG, "=========================================");
-    Log.i(TAG, "");
-    Log.i(TAG, "");
-    Log.i(TAG, "initFitKit");
+    LogH.empty();
+    LogH.empty();
+    LogH.breakerTop();
+    LogH.i("initFitKit");
+    LogH.breaker();
 
     if (connected && rxFit != null) {
       promise.resolve(true);
@@ -52,13 +52,13 @@ public class RxFitHelper {
       );
       Completable rxFitConnection = rxFit.checkConnection();
 
-      Log.i(TAG, "check connection");
+      LogH.i("check connection");
 
       rxFitConnection
         .doOnCompleted(new Action0() {
           @Override
           public void call() {
-            Log.i(TAG, "success!!!!");
+            LogH.i("success!!!!");
             connected = true;
             promise.resolve(true);
           }
@@ -66,7 +66,7 @@ public class RxFitHelper {
         .doOnError(new Action1<Throwable>() {
           @Override
           public void call(Throwable error) {
-            Log.e(TAG, "error, probably canceled");
+            LogH.e("error, probably canceled");
             error.printStackTrace();
             connected = false;
             promise.reject("could not init fit kit", error);
@@ -77,7 +77,7 @@ public class RxFitHelper {
 
     } catch(Exception e) {
       rxFit = null;
-      Log.i(TAG, "error setting up Google Fit connection");
+      LogH.i("error setting up Google Fit connection");
       e.printStackTrace();
       promise.reject("could not init fit kit", e);
     }

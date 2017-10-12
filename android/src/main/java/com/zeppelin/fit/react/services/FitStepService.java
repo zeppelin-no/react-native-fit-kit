@@ -43,17 +43,17 @@ import java.util.TimeZone;
 
 // helpers:
 import com.zeppelin.fit.react.helpers.TimeBounds;
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitStepService {
 
     private RxFit rxFit;
-    public static final String TAG = "RCTFitKit";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
 
     public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
         this.rxFit = rxFit;
-        Log.i(TAG, "FitStepService");
+        LogH.i("FitStepService");
 
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -62,7 +62,7 @@ public class FitStepService {
     }
 
     private void getDailySteps(final Promise promise, long[] timeBounds) {
-        Log.i(TAG, "getDailySteps");
+        LogH.i("getDailySteps");
 
         DataSource ESTIMATED_STEP_DELTAS = new DataSource.Builder()
             .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
@@ -94,15 +94,15 @@ public class FitStepService {
             .subscribe(new Observer<Bucket>() {
                 @Override
                 public void onCompleted() {
-                    Log.i(TAG, "getDailySteps completed");
+                    LogH.i("getDailySteps completed");
                     stepsData.putArray("stepSamples", stepSamples);
                     promise.resolve(stepsData);
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    Log.e(TAG, "getDailySteps error");
-                    Log.e(TAG, Log.getStackTraceString(e));
+                    LogH.e("getDailySteps error");
+                    LogH.e(Log.getStackTraceString(e));
                     promise.reject("getBodyMetrics error!", e);
                 }
 

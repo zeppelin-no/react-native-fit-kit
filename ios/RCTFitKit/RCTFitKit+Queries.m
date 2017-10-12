@@ -284,11 +284,11 @@
                                    HKQuantity* quantity = result.sumQuantity;
                                    if (quantity) {
                                        NSDate* startDate = result.startDate;
-                                       NSDate* endDate = result.endDate;
+                                       // NSDate* endDate = result.endDate;
                                        double value = [quantity doubleValueForUnit:unit];
 
                                        NSString* startDateString = [RCTFitKit buildISO8601StringFromDate:startDate];
-                                       NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:endDate];
+                                       // NSString* endDateString = [RCTFitKit buildISO8601StringFromDate:endDate];
 
                                        NSDictionary* elem = @{
                                            @"value" : @(value),
