@@ -58,10 +58,10 @@ import com.google.android.gms.fitness.request.OnDataPointListener;
 import android.app.IntentService;
 
 // helpers:
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitStepObserver {
 
-  public static final String TAG = "RCTFitKit";
   private RxFit rxFit;
   private Context context;
   private Subscription listner = null;
@@ -73,7 +73,8 @@ public class FitStepObserver {
   }
 
   private void registerFitnessDataListener(DataSource dataSource, DataType dataType) {
-    Log.i(TAG, "registerFitnessDataListener!!");
+    LogH.breakerTop();
+    LogH.i("registerFitnessDataListener!!");
 
     SensorRequest sensorRequest = new SensorRequest.Builder()
       .setDataSource(dataSource)
@@ -85,13 +86,13 @@ public class FitStepObserver {
       .subscribe(new Observer<DataPoint>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "getDataPoints(sensorRequest) Observable done! :(");
+          LogH.i("getDataPoints(sensorRequest) Observable done! :(");
         }
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "ooops error");
-          Log.e(TAG, Log.getStackTraceString(e));
+          LogH.e("ooops error");
+          LogH.e(Log.getStackTraceString(e));
         }
 
         @Override
@@ -100,14 +101,14 @@ public class FitStepObserver {
 
           ReactContext reactContext = (ReactContext) context;
 
-          Log.i(TAG, Long.toString(dataPoint.getEndTime(TimeUnit.MILLISECONDS)));
-          Log.i(TAG, Long.toString(dataPoint.getStartTime(TimeUnit.MILLISECONDS)));
-          // Log.i(TAG, "getDataPoints(sensorRequest) Observable done! :(");
+          LogH.i(Long.toString(dataPoint.getEndTime(TimeUnit.MILLISECONDS)));
+          LogH.i(Long.toString(dataPoint.getStartTime(TimeUnit.MILLISECONDS)));
+          // Log.i("getDataPoints(sensorRequest) Observable done! :(");
 
           for (Field field : dataPoint.getDataType().getFields()) {
               Value val = dataPoint.getValue(field);
-              Log.i(TAG, "Detected DataPoint field: " + field.getName());
-              Log.i(TAG, "Detected DataPoint value: " + val);
+              LogH.i("Detected DataPoint field: " + field.getName());
+              LogH.i("Detected DataPoint value: " + val);
               switch (field.getName()) {
                 case "steps":
                   eventData.putInt("steps", val.asInt());
@@ -128,7 +129,7 @@ public class FitStepObserver {
   }
 
   private void init(final Promise promise, Context context) {
-    Log.i(TAG, "init FitStepObserver");
+    LogH.i("init FitStepObserver");
 
     DataSourcesRequest dataSourcesRequest = new DataSourcesRequest.Builder()
       .setDataSourceTypes(DataSource.TYPE_DERIVED)
@@ -140,20 +141,20 @@ public class FitStepObserver {
       .subscribe(new Observer<DataSource>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "step listner observable done!");
+          LogH.i("step listner observable done!");
           promise.resolve("observable stepSource found");
         }
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "ooops error");
-          Log.e(TAG, Log.getStackTraceString(e));
+          LogH.e("ooops error");
+          LogH.e(Log.getStackTraceString(e));
           promise.reject("error livetracking!", e);
         }
 
         @Override
         public void onNext(DataSource dataSource) {
-          Log.i(TAG, "Data returned for Data type: " + dataSource.getDataType());
+          LogH.i("Data returned for Data type: " + dataSource.getDataType());
 
           if (dataSource.getDataType().equals(DataType.TYPE_STEP_COUNT_DELTA)) {
             registerFitnessDataListener(dataSource, dataSource.getDataType());

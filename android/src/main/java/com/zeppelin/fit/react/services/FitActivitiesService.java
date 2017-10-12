@@ -54,10 +54,10 @@ import static java.text.DateFormat.getTimeInstance;
 
 // helpers:
 import com.zeppelin.fit.react.helpers.TimeBounds;
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitActivitiesService {
 
-  public static final String TAG = "RCTFitKit";
   private RxFit rxFit;
   private Map<String, String> googleFitToFitKitActivityMap = new HashMap<String, String>();
   private Promise mActivityPromise;
@@ -65,7 +65,7 @@ public class FitActivitiesService {
   public FitActivitiesService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
 
-    Log.i(TAG, "starting FitActivitiesService");
+    LogH.i("starting FitActivitiesService");
 
     initGFToFKMap();
 
@@ -169,7 +169,7 @@ public class FitActivitiesService {
   }
 
   private SessionReadRequest readFitnessSession(long[] timeBounds) {
-    Log.i(TAG, "Reading History API results for sessions: ");
+    LogH.i("Reading History API results for sessions: ");
 
     SessionReadRequest readRequest = new SessionReadRequest.Builder()
       .setTimeInterval(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
@@ -224,7 +224,7 @@ public class FitActivitiesService {
       .subscribe(new Observer<SessionReadResult>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "readActivities observable done!");
+          LogH.i("readActivities observable done!");
           if (mActivityPromise != null) {
             mActivityPromise.resolve(activities);
             mActivityPromise = null;
@@ -233,7 +233,7 @@ public class FitActivitiesService {
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "readActivities observable error");
+          LogH.e("readActivities observable error");
           e.printStackTrace();
           if (mActivityPromise != null) {
             mActivityPromise.reject("getActivities error!", e);

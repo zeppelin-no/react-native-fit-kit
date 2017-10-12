@@ -46,18 +46,18 @@ import java.util.UUID;
 // helpers:
 import com.zeppelin.fit.react.helpers.TimeBounds;
 import com.zeppelin.fit.react.helpers.StepsDataSource;
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitStepsDatapointsService {
 
   private RxFit rxFit;
-  public static final String TAG = "RCTFitKit";
   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
   private Promise mStepPromise;
 
   public FitStepsDatapointsService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
-    Log.i(TAG, "FitStepsDatapointsService");
+    LogH.i("FitStepsDatapointsService");
 
     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -68,7 +68,7 @@ public class FitStepsDatapointsService {
   }
 
   private void getDailySteps(final Promise promise, long[] timeBounds) {
-    Log.i(TAG, "getDailySteps");
+    LogH.i("getDailySteps");
 
     // Store the promise to resolve/reject when picker returns data
     mStepPromise = promise;
@@ -88,7 +88,7 @@ public class FitStepsDatapointsService {
       .subscribe(new Observer<DataReadResult>() {
         @Override
         public void onCompleted() {
-          Log.i(TAG, "getStepsDatapoints completed");
+          LogH.i("getStepsDatapoints completed");
           if (mStepPromise != null) {
             stepsData.putArray("stepSamples", stepSamples);
             mStepPromise.resolve(stepsData);
@@ -98,8 +98,8 @@ public class FitStepsDatapointsService {
 
         @Override
         public void onError(Throwable e) {
-          Log.e(TAG, "getDailySteps error");
-          Log.e(TAG, Log.getStackTraceString(e));
+          LogH.e("getDailySteps error");
+          LogH.e(Log.getStackTraceString(e));
           if (mStepPromise != null) {
             mStepPromise.reject("getStepsDatapoints error!", e);
             mStepPromise = null;
@@ -131,7 +131,7 @@ public class FitStepsDatapointsService {
 
         step.putInt("value", dp.getValue(field).asInt());
 
-        String hash = TAG + Integer.toString(dp.hashCode());
+        String hash = LogH.TAG + Integer.toString(dp.hashCode());
         UUID uuid = UUID.nameUUIDFromBytes(hash.getBytes());
 
         step.putString("blockId", uuid.toString());

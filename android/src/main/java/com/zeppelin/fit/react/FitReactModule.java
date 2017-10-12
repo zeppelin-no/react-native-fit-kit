@@ -47,12 +47,12 @@ import rx.functions.Action1;
 
 // helpers:
 import com.zeppelin.fit.react.helpers.RxFitHelper;
+import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitReactModule extends ReactContextBaseJavaModule {
   private Context context;
 
   private final static String REACT_MODULE_NAME = "FitKit";
-  public static final String TAG = "RCTFitKit";
 
   public FitReactModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -76,7 +76,7 @@ public class FitReactModule extends ReactContextBaseJavaModule {
   private long getStartDate(String startDateString) {
     long startDate = 1;
 
-    Log.i(TAG, startDateString);
+    LogH.i(startDateString);
 
     try {
       DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -85,7 +85,7 @@ public class FitReactModule extends ReactContextBaseJavaModule {
 
       startDate = parsedDate.getTime();
     } catch(Exception e) {
-      Log.e(TAG, "error with the startDate string, using 1");
+      LogH.e("error with the startDate string, using 1");
       e.printStackTrace();
     }
 
@@ -137,8 +137,8 @@ public class FitReactModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void removeStepObserver(ReadableMap options, Promise promise) {
-    Log.i(TAG, "removeStepObserver");
-    Log.i(TAG, "observer is: " + mStepObserver);
+    LogH.i("removeStepObserver");
+    LogH.i("observer is: " + mStepObserver);
 
     if (mStepObserver != null) {
       mStepObserver.removeStepObserver();
@@ -151,7 +151,7 @@ public class FitReactModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getBodyMetrics(ReadableMap options, Promise promise) {
-    Log.i(TAG, "getBodyMetrics");
+    LogH.i("getBodyMetrics");
 
     long startDate = 1;
 
@@ -189,21 +189,21 @@ public class FitReactModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getBiologicalSex(ReadableMap options, Promise promise) {
-    Log.i(TAG, "getBiologicalSex");
+    LogH.i("getBiologicalSex");
 
     promise.reject("comming");
   }
 
   @ReactMethod
   public void getLatestHeight(ReadableMap options, Promise promise) {
-    Log.i(TAG, "getLatestHeight");
+    LogH.i("getLatestHeight");
 
     promise.reject("comming");
   }
 
   @ReactMethod
   public void getLatestWeight(ReadableMap options, Promise promise) {
-    Log.i(TAG, "getLatestWeight");
+    LogH.i("getLatestWeight");
 
     promise.reject("comming");
   }
