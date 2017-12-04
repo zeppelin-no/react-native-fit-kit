@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class LogH {
 
-  public static final String TAG = "RCTBGService";
+  public static final String TAG = "RCTFitKit";
 
   public static void breakerTop() {
     Log.i(TAG, "╔═════════════════════════════════════════════");
