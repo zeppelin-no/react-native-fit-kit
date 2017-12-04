@@ -9,6 +9,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
 
 // rx-fit:
 import com.patloew.rxfit.RxFit;
@@ -21,8 +22,7 @@ import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.result.DataReadResult;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.Field;
@@ -69,8 +69,13 @@ public class FitActivitiesService {
 
     initGFToFKMap();
 
+    boolean autoActivities = false;
+    if (options.hasKey("gf_autoActivities") && options.getType("gf_autoActivities") == ReadableType.Boolean) {
+      autoActivities = options.getBoolean("gf_autoActivities");
+    }
+
     long[] timeBounds = TimeBounds.getTimeBounds(options, false);
-    readActivities(promise, timeBounds);
+    readActivities(promise, timeBounds, autoActivities);
   }
 
   private void initGFToFKMap() {
@@ -182,6 +187,21 @@ public class FitActivitiesService {
     return readRequest;
   }
 
+  private DataReadRequest readFitnessHistory(long[] timeBounds) {
+    LogH.i("Reading History API results for sessions: ");
+
+    DataReadRequest readRequest = new DataReadRequest.Builder()
+      .read(DataType.TYPE_ACTIVITY_SEGMENT)
+      .setTimeRange(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
+      // .read(DataType.TYPE_DISTANCE_DELTA)
+      // .read(DataType.AGGREGATE_CALORIES_EXPENDED)
+      // .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
+      .enableServerQueries()
+      .build();
+
+    return readRequest;
+  }
+
   private WritableMap handleDataSet(DataSet dataSet) {
     WritableMap dataSetMap = Arguments.createMap();
 
@@ -213,22 +233,76 @@ public class FitActivitiesService {
     return dataSetMap;
   }
 
-  private void readActivities(final Promise promise, long[] timeBounds) {
+  private void readActivities(final Promise promise, long[] timeBounds, boolean autoActivities) {
     mActivityPromise = promise;
 
-    SessionReadRequest readRequest = readFitnessSession(timeBounds);
-
     final WritableArray activities = Arguments.createArray();
+
+    boolean sessionReadDone = false;
+    boolean historyReadDone = false;
+
+    if (autoActivities == true) {
+      DataReadRequest readRequestHistory = readFitnessHistory(timeBounds);
+
+      rxFit.history().read(readRequestHistory)
+        .subscribe(new Observer<DataReadResult>() {
+          @Override
+          public void onCompleted() {
+            LogH.i("readActivities observable done!");
+            if (sessionReadDone) {
+              if (mActivityPromise != null) {
+                mActivityPromise.resolve(activities);
+                mActivityPromise = null;
+              }
+            }
+
+            historyReadDone = true;
+          }
+
+          @Override
+          public void onError(Throwable e) {
+            LogH.e("readActivities observable error");
+            e.printStackTrace();
+            if (mActivityPromise != null) {
+              mActivityPromise.reject("getActivities error!", e);
+              mActivityPromise = null;
+            }
+
+            historyReadDone = true;
+          }
+
+          @Override
+          public void onNext(DataReadResult dataReadResult) {
+            for (DataSet dataSet : dataReadResult.getDataSets()) {
+              for (DataPoint dataPoint : dataSet.getDataPoints()) {
+                DataType dataType = dataPoint.getDataType();
+                if (dataType.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
+                  String activity = FitnessActivities.getValue(dataPoint);
+                  if (mActivityPromise != null) {
+                    activities.pushString(activity);
+                  }
+                }
+              }
+            }
+          }
+        });
+    }
+
+    SessionReadRequest readRequest = readFitnessSession(timeBounds);
 
     rxFit.sessions().read(readRequest)
       .subscribe(new Observer<SessionReadResult>() {
         @Override
         public void onCompleted() {
           LogH.i("readActivities observable done!");
-          if (mActivityPromise != null) {
-            mActivityPromise.resolve(activities);
-            mActivityPromise = null;
+          if (autoActivities == false || historyReadDone) {
+            if (mActivityPromise != null) {
+              mActivityPromise.resolve(activities);
+              mActivityPromise = null;
+            }
           }
+
+          sessionReadDone = true;
         }
 
         @Override
@@ -239,6 +313,8 @@ public class FitActivitiesService {
             mActivityPromise.reject("getActivities error!", e);
             mActivityPromise = null;
           }
+
+          sessionReadDone = true;
         }
 
         @Override
@@ -292,7 +368,9 @@ public class FitActivitiesService {
               activity.putMap("header", activityHeader);
               activity.putMap("body", activityBody);
 
-              activities.pushMap(activity);
+              if (mActivityPromise != null) {
+                activities.pushMap(activity);
+              }
             }
           }
         }
