@@ -205,6 +205,8 @@ public class FitActivitiesService {
   private WritableMap handleDataSet(DataSet dataSet) {
     WritableMap dataSetMap = Arguments.createMap();
 
+    double totalDistance = 0;
+
     for (DataPoint dp : dataSet.getDataPoints()) {
       DateFormat dateFormat = getTimeInstance();
 
@@ -214,9 +216,7 @@ public class FitActivitiesService {
 
         switch (field.getName()) {
           case "distance":
-            fieldMap.putString("unit", "km");
-            fieldMap.putDouble("value", dp.getValue(field).asFloat() / 1000);
-            dataSetMap.putMap("distance", fieldMap);
+            totalDistance += dp.getValue(field).asFloat() / 1000;
             break;
           case "calories":
             fieldMap.putString("unit", "kcal");
@@ -228,6 +228,13 @@ public class FitActivitiesService {
             dataSetMap.putMap(field.getName(), fieldMap);
         }
       }
+    }
+
+    if (totalDistance > 0) {
+      WritableMap distanceMap = Arguments.createMap();
+      distanceMap.putString("unit", "km");
+      distanceMap.putDouble("value", totalDistance);
+      dataSetMap.putMap("distance", distanceMap);
     }
 
     return dataSetMap;
@@ -319,7 +326,6 @@ public class FitActivitiesService {
 
         @Override
         public void onNext(SessionReadResult sessionReadResult) {
-
           for (Session session : sessionReadResult.getSessions()) {
             String activityName = getActivityName(session.getActivity());
 

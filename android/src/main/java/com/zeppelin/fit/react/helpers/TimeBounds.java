@@ -10,9 +10,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+// helpers:
+import com.zeppelin.fit.react.helpers.LogH;
+
 public class TimeBounds {
 
-  private static final String TAG = "RCTFitKit";
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
   private static long dateToInt(String dateString, long fallback, boolean startOfDay) {
@@ -32,8 +34,8 @@ public class TimeBounds {
 
       dateTimeStamp = cal.getTimeInMillis();
     } catch(Exception e) {
-      Log.e(TAG, "error with the time string, using " + fallback);
-      Log.e(TAG, Log.getStackTraceString(e));
+      LogH.e("error with the time string, using " + fallback);
+      LogH.e(Log.getStackTraceString(e));
       dateTimeStamp = fallback;
     }
 
