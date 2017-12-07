@@ -45,6 +45,7 @@ import com.google.android.gms.fitness.data.DataType;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.HashMap;
+import com.google.android.gms.fitness.data.Bucket;
 
 // response reading:
 import java.util.List;
@@ -61,6 +62,7 @@ public class FitActivitiesService {
   private RxFit rxFit;
   private Map<String, String> googleFitToFitKitActivityMap = new HashMap<String, String>();
   private Promise mActivityPromise;
+  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
   public FitActivitiesService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
@@ -191,8 +193,13 @@ public class FitActivitiesService {
     LogH.i("Reading History API results for sessions: ");
 
     DataReadRequest readRequest = new DataReadRequest.Builder()
-      .read(DataType.TYPE_ACTIVITY_SEGMENT)
       .setTimeRange(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
+      .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
+      .bucketByActivitySegment(1, TimeUnit.MILLISECONDS)
+      // .bucketByActivityType(1, TimeUnit.MILLISECONDS)
+      // .bucketByTime(1, TimeUnit.DAYS)
+      // .bucketByTime(1, TimeUnit.MINUTES)
+      // .read(DataType.TYPE_ACTIVITY_SEGMENT)
       // .read(DataType.TYPE_DISTANCE_DELTA)
       // .read(DataType.AGGREGATE_CALORIES_EXPENDED)
       // .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
@@ -240,22 +247,32 @@ public class FitActivitiesService {
     return dataSetMap;
   }
 
-  private void readActivities(final Promise promise, long[] timeBounds, boolean autoActivities) {
+  private boolean sessionReadDone = false;
+  private boolean historyReadDone = false;
+
+  private void readActivities(final Promise promise, long[] timeBounds, final boolean autoActivities) {
     mActivityPromise = promise;
 
     final WritableArray activities = Arguments.createArray();
 
-    boolean sessionReadDone = false;
-    boolean historyReadDone = false;
+    // boolean sessionReadDone = false;
+    // boolean historyReadDone = false;
 
     if (autoActivities == true) {
       DataReadRequest readRequestHistory = readFitnessHistory(timeBounds);
 
       rxFit.history().read(readRequestHistory)
-        .subscribe(new Observer<DataReadResult>() {
+        .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
+            @Override
+            public Observable<Bucket> call(DataReadResult dataReadResult) {
+              return Observable.from(dataReadResult.getBuckets());
+            }
+          })
+        // .subscribe(new Observer<DataReadResult>() {
+        .subscribe(new Observer<Bucket>() {
           @Override
           public void onCompleted() {
-            LogH.i("readActivities observable done!");
+            LogH.i("read autoActivities observable done!");
             if (sessionReadDone) {
               if (mActivityPromise != null) {
                 mActivityPromise.resolve(activities);
@@ -278,17 +295,62 @@ public class FitActivitiesService {
             historyReadDone = true;
           }
 
-          @Override
-          public void onNext(DataReadResult dataReadResult) {
-            for (DataSet dataSet : dataReadResult.getDataSets()) {
+          // @Override
+          // public void onNext(DataReadResult dataReadResult) {
+          public void onNext(Bucket bucket) {
+            LogH.breakerSmall();
+            LogH.i("autoActivities onNext");
+            // LogH.i("buckets?:" + dataReadResult.getBuckets());
+
+            // for (DataSet dataSet : dataReadResult.getDataSets()) {
+            for (DataSet dataSet : bucket.getDataSets()) {
+              LogH.breaker();
+              LogH.e("a dataSet");
+
+              WritableMap activity = Arguments.createMap();
+              WritableMap activityHeader = Arguments.createMap();
+              WritableMap activityBody = Arguments.createMap();
+
               for (DataPoint dataPoint : dataSet.getDataPoints()) {
+                LogH.breakerSmall();
+                LogH.e("a datapoint");
+
+                String startTime = dateFormat.format(dataPoint.getStartTime(TimeUnit.MILLISECONDS));
+                String endTime = dateFormat.format(dataPoint.getEndTime(TimeUnit.MILLISECONDS));
+
+                // WritableMap timeFrame = makeEffectiveTimeFrameMap(startTime, endTime);
+
+                LogH.e("start: " + startTime);
+                LogH.e("end: " + endTime);
+
                 DataType dataType = dataPoint.getDataType();
-                if (dataType.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
-                  String activity = FitnessActivities.getValue(dataPoint);
-                  if (mActivityPromise != null) {
-                    activities.pushString(activity);
+                // if (dataType.equals(DataType.TYPE_ACTIVITY_SEGMENT)) {
+                for(Field field : dataType.getFields()) {
+                  // String activity = FitnessActivities.getValue(dataPoint);
+                  // dp.getValue(field).asActivity()
+                  LogH.e("wiiiiii field name: " + field.getName());
+                  if (field.getName().equals(Field.FIELD_ACTIVITY.getName())) {
+                    String activityName = dataPoint.getValue(field).asActivity();
+                    LogH.e("wiiiiii activity type: " + activityName);
                   }
+                  // switch (field.getName()) {
+                  //   case Field.FIELD_ACTIVITY.getName():
+                  //     LogH.e("wiiiiii");
+                  //     String activity = dp.getValue(field).asActivity();
+                  //     LogH.e("wiiiiii" + activity);
+                  //     break;
+                  //   default:
+                  //     LogH.e("ajjjj");
+                  // }
+                  // if (mActivityPromise != null) {
+                  //   activities.pushString(activity);
+                  // }
                 }
+
+                // activityBody.putString("activity_name", activityName);
+                // activityBody.merge(timeFrame);
+                // activityBody.merge(dataSetMap);
+                // }
               }
             }
           }
@@ -339,36 +401,44 @@ public class FitActivitiesService {
               WritableMap activity = Arguments.createMap();
               WritableMap activityHeader = Arguments.createMap();
               WritableMap activityBody = Arguments.createMap();
-              SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-              String startTime = dateFormat.format(session.getStartTime(TimeUnit.MILLISECONDS));
-              String endTime = dateFormat.format(session.getEndTime(TimeUnit.MILLISECONDS));
+
+              long startTime = session.getStartTime(TimeUnit.MILLISECONDS);
+              long endTime = session.getEndTime(TimeUnit.MILLISECONDS);
 
               // header
               WritableMap schemaId = Arguments.createMap();
               activityHeader.putString("id", session.getIdentifier());
-              activityHeader.putString("creation_date_time", startTime);
+              activityHeader.putString("creation_date_time", dateFormat.format(startTime));
               schemaId.putString("name", "physical-activity");
               schemaId.putString("namespace", "omh");
               schemaId.putString("version", "1.2");
               activityHeader.putMap("schema_id", schemaId);
 
-              // body
-              WritableMap effectiveTimeFrame = Arguments.createMap();
-              activityBody.putString("activity_name", activityName);
-              if (startTime != endTime) {
-                WritableMap duration = Arguments.createMap();
-                duration.putString("unit", "sec");
-                duration.putInt("value", (int) (long) (session.getEndTime(TimeUnit.SECONDS) - session.getStartTime(TimeUnit.SECONDS)));
-                activityBody.putMap("duration", duration);
 
-                WritableMap timeInterval = Arguments.createMap();
-                timeInterval.putString("start_date_time", startTime);
-                timeInterval.putString("end_date_time", endTime);
-                effectiveTimeFrame.putMap("time_interval", timeInterval);
-              } else {
-                effectiveTimeFrame.putString("date_time", startTime);
-              }
-              activityBody.putMap("effective_time_frame", effectiveTimeFrame);
+              // String startTime = dateFormat.format(session.getStartTime(TimeUnit.MILLISECONDS));
+              // String endTime = dateFormat.format(session.getEndTime(TimeUnit.MILLISECONDS));
+
+              // body
+              WritableMap timeFrame = makeEffectiveTimeFrameMap(startTime, endTime);
+
+              // Arguments.createMap();
+              // if (startTime != endTime) {
+              //   WritableMap duration = Arguments.createMap();
+              //   duration.putString("unit", "sec");
+              //   duration.putInt("value", (int) (long) (session.getEndTime(TimeUnit.SECONDS) - session.getStartTime(TimeUnit.SECONDS)));
+              //   activityBody.putMap("duration", duration);
+              //
+              //   WritableMap timeInterval = Arguments.createMap();
+              //   timeInterval.putString("start_date_time", startTime);
+              //   timeInterval.putString("end_date_time", endTime);
+              //   effectiveTimeFrame.putMap("time_interval", timeInterval);
+              // } else {
+              //   effectiveTimeFrame.putString("date_time", startTime);
+              // }
+
+              // activityBody.putMap("effective_time_frame", effectiveTimeFrame);
+              activityBody.putString("activity_name", activityName);
+              activityBody.merge(timeFrame);
               activityBody.merge(dataSetMap);
 
               activity.putMap("header", activityHeader);
@@ -381,5 +451,32 @@ public class FitActivitiesService {
           }
         }
       });
+  }
+
+  private WritableMap makeEffectiveTimeFrameMap(long startTime, long endTime) {
+    String startTimeFormated = dateFormat.format(startTime);
+    String endTimeFormated = dateFormat.format(endTime);
+
+    WritableMap activityBody = Arguments.createMap();
+
+    WritableMap effectiveTimeFrame = Arguments.createMap();
+
+    if (startTime != endTime) {
+      WritableMap duration = Arguments.createMap();
+      duration.putString("unit", "sec");
+      duration.putInt("value", (int) (long) ((endTime - startTime) / 1000));
+      activityBody.putMap("duration", duration);
+
+      WritableMap timeInterval = Arguments.createMap();
+      timeInterval.putString("start_date_time", startTimeFormated);
+      timeInterval.putString("end_date_time", endTimeFormated);
+      effectiveTimeFrame.putMap("time_interval", timeInterval);
+    } else {
+      effectiveTimeFrame.putString("date_time", startTimeFormated);
+    }
+
+    activityBody.putMap("effective_time_frame", effectiveTimeFrame);
+
+    return activityBody;
   }
 }
