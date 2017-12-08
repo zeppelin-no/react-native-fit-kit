@@ -47,88 +47,88 @@ import com.zeppelin.fit.react.helpers.LogH;
 
 public class FitStepService {
 
-    private RxFit rxFit;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
+  private RxFit rxFit;
+  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+  private final SimpleDateFormat dateFormatSimple = new SimpleDateFormat("yyyy-MM-dd");
 
-    public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
-        this.rxFit = rxFit;
-        LogH.i("FitStepService");
+  public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
+    this.rxFit = rxFit;
+    LogH.i("FitStepService");
 
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        long[] timeBounds = TimeBounds.getTimeBounds(options);
-        getDailySteps(promise, timeBounds);
-    }
+    long[] timeBounds = TimeBounds.getTimeBounds(options);
+    getDailySteps(promise, timeBounds);
+  }
 
-    private void getDailySteps(final Promise promise, long[] timeBounds) {
-        LogH.i("getDailySteps");
+  private void getDailySteps(final Promise promise, long[] timeBounds) {
+    LogH.i("getDailySteps");
 
-        DataSource ESTIMATED_STEP_DELTAS = new DataSource.Builder()
-            .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
-            .setType(DataSource.TYPE_DERIVED)
-            .setStreamName("estimated_steps")
-            .setAppPackageName("com.google.android.gms")
-            .build();
+    DataSource ESTIMATED_STEP_DELTAS = new DataSource.Builder()
+      .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+      .setType(DataSource.TYPE_DERIVED)
+      .setStreamName("estimated_steps")
+      .setAppPackageName("com.google.android.gms")
+      .build();
 
-        DataReadRequest dataReadRequest = new DataReadRequest.Builder()
-            .aggregate(ESTIMATED_STEP_DELTAS, DataType.AGGREGATE_STEP_COUNT_DELTA)
-            // .aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA)
-            // .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
-            // .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
-            .bucketByTime(1, TimeUnit.DAYS)
-            .setTimeRange(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
-            .build();
+    DataReadRequest dataReadRequest = new DataReadRequest.Builder()
+      .aggregate(ESTIMATED_STEP_DELTAS, DataType.AGGREGATE_STEP_COUNT_DELTA)
+      // .aggregate(DataType.TYPE_DISTANCE_DELTA, DataType.AGGREGATE_DISTANCE_DELTA)
+      // .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
+      // .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
+      .bucketByTime(1, TimeUnit.DAYS)
+      .setTimeRange(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
+      .build();
 
-        final WritableArray stepSamples = Arguments.createArray();
-        final WritableMap stepsData = Arguments.createMap();
-        stepsData.putString("endDate", dateFormat.format(timeBounds[1]));
+    final WritableArray stepSamples = Arguments.createArray();
+    final WritableMap stepsData = Arguments.createMap();
+    stepsData.putString("endDate", dateFormat.format(timeBounds[1]));
 
-        rxFit.history().read(dataReadRequest)
-            .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
-                    @Override
-                    public Observable<Bucket> call(DataReadResult dataReadResult) {
-                        return Observable.from(dataReadResult.getBuckets());
-                    }
-                })
-            .subscribe(new Observer<Bucket>() {
-                @Override
-                public void onCompleted() {
-                    LogH.i("getDailySteps completed");
-                    stepsData.putArray("stepSamples", stepSamples);
-                    promise.resolve(stepsData);
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    LogH.e("getDailySteps error");
-                    LogH.e(Log.getStackTraceString(e));
-                    promise.reject("getBodyMetrics error!", e);
-                }
-
-                @Override
-                public void onNext(Bucket bucket) {
-                    for (DataSet dataSet : bucket.getDataSets()) {
-                        stepSamples.pushMap(formatStepData(dataSet));
-                    }
-                }
-            });
-    }
-
-    private WritableMap formatStepData(DataSet dataSet) {
-        WritableMap step = Arguments.createMap();
-
-        for (DataPoint dp : dataSet.getDataPoints()) {
-            for(Field field : dp.getDataType().getFields()) {
-                switch (field.getName()) {
-                    case "steps":
-                        step.putString("date", dateFormatSimple.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
-                        step.putInt("value", dp.getValue(field).asInt());
-                        break;
-                }
-            }
+    rxFit.history().read(dataReadRequest)
+      .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
+          @Override
+          public Observable<Bucket> call(DataReadResult dataReadResult) {
+            return Observable.from(dataReadResult.getBuckets());
+          }
+        })
+      .subscribe(new Observer<Bucket>() {
+        @Override
+        public void onCompleted() {
+          LogH.i("getDailySteps completed");
+          stepsData.putArray("stepSamples", stepSamples);
+          promise.resolve(stepsData);
         }
 
-        return step;
+        @Override
+        public void onError(Throwable e) {
+          LogH.e("getDailySteps error");
+          LogH.e(Log.getStackTraceString(e));
+          promise.reject("getBodyMetrics error!", e);
+        }
+
+        @Override
+        public void onNext(Bucket bucket) {
+          for (DataSet dataSet : bucket.getDataSets()) {
+            stepSamples.pushMap(formatStepData(dataSet));
+          }
+        }
+      });
+  }
+
+  private WritableMap formatStepData(DataSet dataSet) {
+    WritableMap step = Arguments.createMap();
+
+    for (DataPoint dp : dataSet.getDataPoints()) {
+      for(Field field : dp.getDataType().getFields()) {
+        switch (field.getName()) {
+          case "steps":
+            step.putString("date", dateFormatSimple.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+            step.putInt("value", dp.getValue(field).asInt());
+            break;
+        }
+      }
     }
+
+    return step;
+  }
 }
