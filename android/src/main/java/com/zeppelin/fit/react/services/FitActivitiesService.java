@@ -61,6 +61,7 @@ public class FitActivitiesService {
 
   private RxFit rxFit;
   private Map<String, String> googleFitToFitKitActivityMap = new HashMap<String, String>();
+  private Map<String, String> googleFitToFitKitAutomaticActivityMap = new HashMap<String, String>();
   private Promise mActivityPromise;
   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
   private int autoActivitiesMinDuration = 10;
@@ -71,6 +72,7 @@ public class FitActivitiesService {
     LogH.i("starting FitActivitiesService");
 
     initGFToFKMap();
+    initGFAutomaticToFKMap();
 
     boolean autoActivities = false;
     if (options.hasKey("gf_autoActivities") && options.getType("gf_autoActivities") == ReadableType.Boolean) {
@@ -83,6 +85,15 @@ public class FitActivitiesService {
 
     long[] timeBounds = TimeBounds.getTimeBounds(options, false);
     readActivities(promise, timeBounds, autoActivities);
+  }
+
+  private void initGFAutomaticToFKMap() {
+    googleFitToFitKitAutomaticActivityMap.put("STILL", "IGNORE");
+    googleFitToFitKitAutomaticActivityMap.put("UNKNOWN", "IGNORE");
+    googleFitToFitKitAutomaticActivityMap.put("WALKING", "WALKING");
+    googleFitToFitKitAutomaticActivityMap.put("RUNNING", "RUNNING");
+    googleFitToFitKitAutomaticActivityMap.put("ON_FOOT", "WALKING");
+    googleFitToFitKitAutomaticActivityMap.put("ON_BICYCLE", "CYCLING");
   }
 
   private void initGFToFKMap() {
@@ -156,7 +167,6 @@ public class FitActivitiesService {
       googleFitToFitKitActivityMap.put("SWIMMING.POOL", "SWIMMING");
       googleFitToFitKitActivityMap.put("TEAM_SPORTS", "OTHER");
       googleFitToFitKitActivityMap.put("TREADMILL", "RUNNING");
-      googleFitToFitKitActivityMap.put("UNKNOWN", "OTHER");
       googleFitToFitKitActivityMap.put("VOLLEYBALL.BEACH", "VOLLEYBALL");
       googleFitToFitKitActivityMap.put("VOLLEYBALL.INDOOR", "VOLLEYBALL");
       googleFitToFitKitActivityMap.put("WAKEBOARDING", "WATER_SPORTS");
@@ -169,17 +179,27 @@ public class FitActivitiesService {
       googleFitToFitKitActivityMap.put("WHEELCHAIR", "WHEELCHAIR_WALK_PACE");
       googleFitToFitKitActivityMap.put("WINDSURFING", "WATER_SPORTS");
       googleFitToFitKitActivityMap.put("ZUMBA", "HIGH_INTENSITY_INTERVAL_TRAINING");
+      googleFitToFitKitActivityMap.put("UNKNOWN", "OTHER");
+      googleFitToFitKitActivityMap.put("STILL", "IGNORE");
 
       // automatic
-      googleFitToFitKitActivityMap.put("STILL", "IGNORE");
-      googleFitToFitKitActivityMap.put("WALKING", "WALKING");
-      googleFitToFitKitActivityMap.put("RUNNING", "RUNNING");
-      googleFitToFitKitActivityMap.put("ON_FOOT", "WALKING");
-      googleFitToFitKitActivityMap.put("ON_BICYCLE", "CYCLING");
+      // googleFitToFitKitActivityMap.put("UNKNOWN", "IGNORE");
+      // googleFitToFitKitActivityMap.put("WALKING", "WALKING");
+      // googleFitToFitKitActivityMap.put("RUNNING", "RUNNING");
+      // googleFitToFitKitActivityMap.put("ON_FOOT", "WALKING");
+      // googleFitToFitKitActivityMap.put("ON_BICYCLE", "CYCLING");
   }
 
   private String getActivityName(String gfActivityName) {
     String mappedActivity = googleFitToFitKitActivityMap.get(gfActivityName.toUpperCase());
+    // if (mappedActivity == null) {
+    //   return gfActivityName.toUpperCase();
+    // }
+    return mappedActivity;
+  }
+
+  private String getAutoActivityName(String gfActivityName) {
+    String mappedActivity = googleFitToFitKitAutomaticActivityMap.get(gfActivityName.toUpperCase());
     // if (mappedActivity == null) {
     //   return gfActivityName.toUpperCase();
     // }
@@ -318,8 +338,8 @@ public class FitActivitiesService {
             LogH.breakerSmall();
             LogH.i("autoActivities onNext");
 
-            LogH.i("autoActivities getActivity" + bucket.getActivity());
-            String activityName = getActivityName(bucket.getActivity());
+            LogH.i("autoActivities getActivity: " + bucket.getActivity());
+            String activityName = getAutoActivityName(bucket.getActivity());
 
             if (activityName != null && activityName != "IGNORE") {
               long startTime = bucket.getStartTime(TimeUnit.MILLISECONDS);
