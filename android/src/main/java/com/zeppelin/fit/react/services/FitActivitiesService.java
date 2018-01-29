@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.List;
 
 // activity
 import com.google.android.gms.fitness.data.Session;
@@ -69,6 +70,7 @@ public class FitActivitiesService {
   public FitActivitiesService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
 
+    LogH.breaker();
     LogH.i("starting FitActivitiesService");
 
     initGFToFKMap();
@@ -207,14 +209,13 @@ public class FitActivitiesService {
   }
 
   private SessionReadRequest readFitnessSession(long[] timeBounds) {
-    LogH.i("Reading History API results for sessions: ");
-
     SessionReadRequest readRequest = new SessionReadRequest.Builder()
       .setTimeInterval(timeBounds[0], timeBounds[1], TimeUnit.MILLISECONDS)
       .read(DataType.TYPE_DISTANCE_DELTA)
       .read(DataType.AGGREGATE_CALORIES_EXPENDED)
       // .read(DataType.AGGREGATE_ACTIVITY_SUMMARY)
       .readSessionsFromAllApps()
+      .enableServerQueries()
       .build();
 
     return readRequest;
@@ -293,9 +294,6 @@ public class FitActivitiesService {
 
     final WritableArray activities = Arguments.createArray();
 
-    // boolean sessionReadDone = false;
-    // boolean historyReadDone = false;
-
     if (autoActivities == true) {
       DataReadRequest readRequestHistory = readFitnessHistory(timeBounds);
 
@@ -303,7 +301,8 @@ public class FitActivitiesService {
         .flatMapObservable(new Func1<DataReadResult, Observable<Bucket>>() {
             @Override
             public Observable<Bucket> call(DataReadResult dataReadResult) {
-              LogH.i("autoActivities bucket size: " + dataReadResult.getBuckets().size());
+              List<Bucket> buckets = dataReadResult.getBuckets();
+              LogH.i("Auto-activity-buckets: " + buckets.size());
               return Observable.from(dataReadResult.getBuckets());
             }
           })
@@ -336,9 +335,9 @@ public class FitActivitiesService {
           // @Override
           public void onNext(Bucket bucket) {
             LogH.breakerSmall();
-            LogH.i("autoActivities onNext");
-
-            LogH.i("autoActivities getActivity: " + bucket.getActivity());
+            // LogH.i("autoActivities onNext");
+            //
+            // LogH.i("autoActivities getActivity: " + bucket.getActivity());
             String activityName = getAutoActivityName(bucket.getActivity());
 
             if (activityName != null && activityName != "IGNORE") {
@@ -412,7 +411,9 @@ public class FitActivitiesService {
 
         @Override
         public void onNext(SessionReadResult sessionReadResult) {
-          for (Session session : sessionReadResult.getSessions()) {
+          List<Session> sessions = sessionReadResult.getSessions();
+          LogH.i("Activity-sessions: " + sessions.size());
+          for (Session session : sessions) {
             String activityName = getActivityName(session.getActivity());
 
             if (activityName != null && activityName != "IGNORE") {

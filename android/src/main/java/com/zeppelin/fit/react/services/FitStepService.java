@@ -53,6 +53,7 @@ public class FitStepService {
 
   public FitStepService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
+    LogH.breaker();
     LogH.i("FitStepService");
 
     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));

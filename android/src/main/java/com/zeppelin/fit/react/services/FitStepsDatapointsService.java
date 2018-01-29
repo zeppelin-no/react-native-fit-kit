@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.List;
 
 import java.text.DateFormat;
 import static java.text.DateFormat.getDateInstance;
@@ -57,6 +58,7 @@ public class FitStepsDatapointsService {
 
   public FitStepsDatapointsService(RxFit rxFit, Promise promise, Context context, ReadableMap options) {
     this.rxFit = rxFit;
+    LogH.breaker();
     LogH.i("FitStepsDatapointsService");
 
     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -64,11 +66,11 @@ public class FitStepsDatapointsService {
     long[] timeBounds = TimeBounds.getTimeBounds(options);
 
 
-    getDailySteps(promise, timeBounds);
+    getStepsDataPoints(promise, timeBounds);
   }
 
-  private void getDailySteps(final Promise promise, long[] timeBounds) {
-    LogH.i("getDailySteps");
+  private void getStepsDataPoints(final Promise promise, long[] timeBounds) {
+    LogH.i("getStepsDataPoints");
 
     // Store the promise to resolve/reject when picker returns data
     mStepPromise = promise;
@@ -88,7 +90,7 @@ public class FitStepsDatapointsService {
       .subscribe(new Observer<DataReadResult>() {
         @Override
         public void onCompleted() {
-          LogH.i("getStepsDatapoints completed");
+          LogH.i("getStepsDataPoints completed");
           if (mStepPromise != null) {
             stepsData.putArray("stepSamples", stepSamples);
             mStepPromise.resolve(stepsData);
@@ -98,10 +100,10 @@ public class FitStepsDatapointsService {
 
         @Override
         public void onError(Throwable e) {
-          LogH.e("getDailySteps error");
+          LogH.e("getStepsDataPoints error");
           LogH.e(Log.getStackTraceString(e));
           if (mStepPromise != null) {
-            mStepPromise.reject("getStepsDatapoints error!", e);
+            mStepPromise.reject("getStepsDataPoints error!", e);
             mStepPromise = null;
           }
         }
@@ -110,7 +112,9 @@ public class FitStepsDatapointsService {
         public void onNext(DataReadResult bucket) {
           if (mStepPromise != null) {
             for (DataSet dataSet : bucket.getDataSets()) {
-              for (DataPoint dp : dataSet.getDataPoints()) {
+              List<DataPoint> dataPoints = dataSet.getDataPoints();
+              LogH.i("Steps-datapoints: " + dataPoints.size());
+              for (DataPoint dp : dataPoints) {
                 for(Field field : dp.getDataType().getFields()) {
                   stepSamples.pushMap(formatStepData(field, dp));
                 }
