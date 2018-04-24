@@ -95,7 +95,11 @@ public class FitActivitiesService {
     googleFitToFitKitAutomaticActivityMap.put("WALKING", "WALKING");
     googleFitToFitKitAutomaticActivityMap.put("RUNNING", "RUNNING");
     googleFitToFitKitAutomaticActivityMap.put("ON_FOOT", "WALKING");
+
+    googleFitToFitKitAutomaticActivityMap.put("BIKING", "CYCLING");
     googleFitToFitKitAutomaticActivityMap.put("ON_BICYCLE", "CYCLING");
+
+    googleFitToFitKitAutomaticActivityMap.put("SKIING.CROSS_COUNTRY", "CROSS_COUNTRY_SKIING");
   }
 
   private void initGFToFKMap() {
@@ -335,9 +339,9 @@ public class FitActivitiesService {
           // @Override
           public void onNext(Bucket bucket) {
             LogH.breakerSmall();
-            // LogH.i("autoActivities onNext");
-            //
-            // LogH.i("autoActivities getActivity: " + bucket.getActivity());
+            LogH.i("autoActivities onNext");
+
+            LogH.i("autoActivities getActivity: " + bucket.getActivity());
             String activityName = getAutoActivityName(bucket.getActivity());
 
             if (activityName != null && activityName != "IGNORE") {
