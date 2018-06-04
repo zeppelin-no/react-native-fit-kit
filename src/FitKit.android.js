@@ -6,15 +6,15 @@ import { PermissionsAndroid } from 'react-native';
 const initFitKit = (options = {}) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      const hasPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+
       let granted = true;
 
       if (!hasPermission) {
         granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-            title: 'ACCESS_FINE_LOCATION Permission',
-            message: '',
-          }
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
       }
 
